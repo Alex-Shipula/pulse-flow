@@ -33,7 +33,7 @@ const TopBar = () => {
           cursor: 'pointer'
         }}
       >
-        <Logo width={'70px'} height={'70px'}/>
+        <Logo width={'70px'} height={'70px'} />
         <Box
           sx={{
             fontSize: '32px',
