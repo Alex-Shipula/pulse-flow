@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 export function useAuthWatchDog (afterLogin: () => void, afterLogout: () => void) {
-  const isAuthenticated = localStorage.getItem('name') !== null
+  const isAuthenticated = localStorage.getItem('token') !== null
 
   useEffect(() => {
     if (isAuthenticated) {

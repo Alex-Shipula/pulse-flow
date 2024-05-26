@@ -10,10 +10,8 @@ const Routes = () => {
 
   useLayoutEffect(() => {
     const token = localStorage.getItem('token')
-    const name = localStorage.getItem('name')
-    if (token ?? name) {
+    if (token) {
       token && setAuth(token)
-      name && setAuth(name)
     } else {
       setAuth('')
     }
