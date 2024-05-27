@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { serverURL } from 'src/config'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RootState } from '.'
 
 interface RequestUser {
@@ -17,6 +19,7 @@ export interface IUser {
   surname: string
   email: string
   disabled: boolean
+  password?: string
 }
 
 interface SearchUserRequest {

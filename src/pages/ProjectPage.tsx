@@ -20,6 +20,9 @@ const ProjectPage: React.FC = () => {
         alignItems={'start'}
         gap={'30px'}
       >
+        <Typography fontSize={30} >
+          Проекти
+        </Typography>
         <Typography fontSize={20} >
           Створюй свої проекти та долучайся до вже існуючих
         </Typography>

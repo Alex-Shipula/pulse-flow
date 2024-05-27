@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-duplicates
 import React from 'react'
-// eslint-disable-next-line import/no-duplicates
+// eslint-disable-next-line import/no-duplicates, @typescript-eslint/no-unused-vars
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 interface Props {

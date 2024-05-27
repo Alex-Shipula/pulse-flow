@@ -2,7 +2,6 @@ import React from 'react'
 import authImage from 'src/assets/logo-pulse-flow.svg'
 import {
   Box, styled, Modal as MuiModal, useTheme, Typography,
-  TextField,
   Button,
   InputAdornment,
   IconButton
@@ -12,6 +11,7 @@ import { serverURL } from 'src/config'
 import axios from 'axios'
 import { useDispatch } from 'react-redux'
 import { setEmailState } from 'src/store/users'
+import CustomizedInput from 'src/components/CustomizedInput'
 
 const SignInPage: React.FC = () => {
   const theme = useTheme()
@@ -51,52 +51,52 @@ const SignInPage: React.FC = () => {
   }
 
   const handleAuthLogin = async () => {
-    // await localStorage.setItem('token', 'token')
-    // window.location.reload()
-    // setError('')
+    await localStorage.setItem('token', 'token')
+    window.location.reload()
+    setError('')
 
-    if (!email || !password || (signUp && (!name || !surname))) {
-      setError('Email, password, name, surname are required')
-    } else if (signUp && name && password && surname) {
-      const authObject = {
-        name,
-        surname,
-        password,
-        email,
-        disabled: false
-      }
-      await axios.post(`${serverURL}/api/user`, authObject)
-        .then((res) => {
-          if (res?.data) {
-            setSignUp(false)
-            setName('')
-            setSurname('')
-            setError('')
-          }
-        })
-        .catch((err) => {
-          setError(err?.response?.data?.message || 'Something went wrong')
-        })
-    } else if (!signUp && email && password) {
-      const authObject = {
-        email,
-        password
-      }
-      await axios.post(`${serverURL}/api/auth/login`, authObject)
-        .then((res) => {
-          if (res?.data?.token) {
-            dispatch(setEmailState(email))
-            localStorage.setItem('token', res?.data?.token)
-            window.location.reload()
-            setError('')
-            setEmail('')
-            setPassword('')
-          }
-        })
-        .catch((err) => {
-          setError(err?.response?.data?.message || 'Something went wrong')
-        })
-    }
+    // if (!email || !password || (signUp && (!name || !surname))) {
+    //   setError('Email, password, name, surname are required')
+    // } else if (signUp && name && password && surname) {
+    //   const authObject = {
+    //     name,
+    //     surname,
+    //     password,
+    //     email,
+    //     disabled: false
+    //   }
+    //   await axios.post(`${serverURL}/api/user`, authObject)
+    //     .then((res) => {
+    //       if (res?.data) {
+    //         setSignUp(false)
+    //         setName('')
+    //         setSurname('')
+    //         setError('')
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       setError(err?.response?.data?.message || 'Something went wrong')
+    //     })
+    // } else if (!signUp && email && password) {
+    //   const authObject = {
+    //     email,
+    //     password
+    //   }
+    //   await axios.post(`${serverURL}/api/auth/login`, authObject)
+    //     .then((res) => {
+    //       if (res?.data?.token) {
+    //         dispatch(setEmailState(email))
+    //         localStorage.setItem('token', res?.data?.token)
+    //         window.location.reload()
+    //         setError('')
+    //         setEmail('')
+    //         setPassword('')
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       setError(err?.response?.data?.message || 'Something went wrong')
+    //     })
+    // }
   }
 
   return (
@@ -286,34 +286,5 @@ align-items: center;
   background: rgba(255, 255, 255, 0.60);
   box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(25px);
-}
-`)
-
-const CustomizedInput = styled(TextField)(`
-.MuiInputBase-input{
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0.15px;
-  outline: none;
-  padding: 2px 4px;
-  &::placeholder {
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
-  }
-}
-.MuiOutlinedInput-root {
-  width: 381px;
-  height: 40px;
-  border-radius: 16px;
-  border-color: rgba(65, 65, 213, 0.30);
-  input {
-    padding-left: 16px;
-  }
-}
-.MuiOutlinedInput-notchedOutline {
-  border-radius: 16px;
-  border-color: rgba(65, 65, 213, 0.30);
 }
 `)
