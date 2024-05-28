@@ -51,52 +51,52 @@ const SignInPage: React.FC = () => {
   }
 
   const handleAuthLogin = async () => {
-    await localStorage.setItem('token', 'token')
-    window.location.reload()
-    setError('')
+    // await localStorage.setItem('token', 'token')
+    // window.location.reload()
+    // setError('')
 
-    // if (!email || !password || (signUp && (!name || !surname))) {
-    //   setError('Email, password, name, surname are required')
-    // } else if (signUp && name && password && surname) {
-    //   const authObject = {
-    //     name,
-    //     surname,
-    //     password,
-    //     email,
-    //     disabled: false
-    //   }
-    //   await axios.post(`${serverURL}/api/user`, authObject)
-    //     .then((res) => {
-    //       if (res?.data) {
-    //         setSignUp(false)
-    //         setName('')
-    //         setSurname('')
-    //         setError('')
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       setError(err?.response?.data?.message || 'Something went wrong')
-    //     })
-    // } else if (!signUp && email && password) {
-    //   const authObject = {
-    //     email,
-    //     password
-    //   }
-    //   await axios.post(`${serverURL}/api/auth/login`, authObject)
-    //     .then((res) => {
-    //       if (res?.data?.token) {
-    //         dispatch(setEmailState(email))
-    //         localStorage.setItem('token', res?.data?.token)
-    //         window.location.reload()
-    //         setError('')
-    //         setEmail('')
-    //         setPassword('')
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       setError(err?.response?.data?.message || 'Something went wrong')
-    //     })
-    // }
+    if (!email || !password || (signUp && (!name || !surname))) {
+      setError('Email, password, name, surname are required')
+    } else if (signUp && name && password && surname) {
+      const authObject = {
+        name,
+        surname,
+        password,
+        email,
+        disabled: false
+      }
+      await axios.post(`${serverURL}/user`, authObject)
+        .then((res) => {
+          if (res?.data) {
+            setSignUp(false)
+            setName('')
+            setSurname('')
+            setError('')
+          }
+        })
+        .catch((err) => {
+          setError(err?.response?.data?.message || 'Something went wrong')
+        })
+    } else if (!signUp && email && password) {
+      const authObject = {
+        email,
+        password
+      }
+      await axios.post(`${serverURL}/auth/login`, authObject)
+        .then((res) => {
+          if (res?.data?.token) {
+            dispatch(setEmailState(email))
+            localStorage.setItem('token', res?.data?.token)
+            window.location.reload()
+            setError('')
+            setEmail('')
+            setPassword('')
+          }
+        })
+        .catch((err) => {
+          setError(err?.response?.data?.message || 'Something went wrong')
+        })
+    }
   }
 
   return (

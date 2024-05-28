@@ -2,6 +2,7 @@
 import { configureStore, combineReducers, type Middleware, isRejectedWithValue } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import usersReduser, { UserApi } from './users'
+import companyReduser, { CompanyApi } from './company'
 
 const unauthenticatedMiddleware: Middleware = () => (next) => (action) => {
   if (isRejectedWithValue(action) &&
@@ -14,7 +15,9 @@ const unauthenticatedMiddleware: Middleware = () => (next) => (action) => {
 
 const reducers = {
   users: usersReduser,
-  [UserApi.reducerPath]: UserApi.reducer
+  company: companyReduser,
+  [UserApi.reducerPath]: UserApi.reducer,
+  [CompanyApi.reducerPath]: CompanyApi.reducer
 }
 
 const rootReducer = combineReducers<typeof reducers>(reducers)
@@ -26,7 +29,8 @@ export const store = configureStore({
       serializableCheck: false
     })
       .concat(UserApi.middleware)
-      .concat(unauthenticatedMiddleware),
+      .concat(unauthenticatedMiddleware)
+      .concat(CompanyApi.middleware),
   devTools: process.env.NODE_ENV !== 'production'
 })
 
