@@ -14,11 +14,11 @@ interface RequestCompany {
 }
 
 export interface ICompany {
-  id: number
+  id?: number
   name: string
   unique_identifier: string
-  website: string
-  logo: string
+  website?: string
+  logo?: string
 }
 
 interface UpdateCompany {
@@ -47,7 +47,7 @@ export const CompanyApi = createApi({
   }),
   tagTypes: ['Company'],
   endpoints: (builder) => ({
-    createCompany: builder.mutation<RequestCompany, ICompany>({
+    createCompany: builder.mutation<RequestCompany, FormData>({
       query: (company) => ({
         url: '',
         method: 'POST',
@@ -76,6 +76,12 @@ export const CompanyApi = createApi({
         body: company
       }),
       invalidatesTags: [{ type: 'Company', id: 'LIST' }]
+    }),
+    getMe: builder.query<ICompany, void>({
+      query: () => ({
+        url: '/me',
+        method: 'GET'
+      })
     })
   })
 })
@@ -84,15 +90,18 @@ export const {
   useCreateCompanyMutation,
   useSearchCompanyQuery,
   useGetCompanyQuery,
-  useUpdateCompanyMutation
+  useUpdateCompanyMutation,
+  useGetMeQuery
 } = CompanyApi
 
 interface CompanyState {
   company: ICompany[]
+  currentCompany?: ICompany
 }
 
 const initialState: CompanyState = {
-  company: []
+  company: [],
+  currentCompany: undefined
 }
 
 const companySlice = createSlice({
@@ -101,12 +110,16 @@ const companySlice = createSlice({
   reducers: {
     setCompanyState: (state, action: PayloadAction<ICompany[]>) => {
       state.company = action.payload
+    },
+    setCurrentCompany: (state, action: PayloadAction<ICompany>) => {
+      state.currentCompany = action.payload
     }
   }
 })
 
-export const { setCompanyState } = companySlice.actions
+export const { setCompanyState, setCurrentCompany } = companySlice.actions
 
 export const selectCompanyState = (state: RootState) => state?.company.company
+export const selectCurrentCompany = (state: RootState) => state?.company.currentCompany
 
 export default companySlice.reducer

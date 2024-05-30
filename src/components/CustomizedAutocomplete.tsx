@@ -2,7 +2,9 @@ import React from 'react'
 
 import MuiAutocomplete from '@mui/material/Autocomplete'
 import Popper from '@mui/material/Popper'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { InputProps } from '@mui/material/Input'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { AutocompleteProps as MuiAutocompleteProps } from '@mui/material/Autocomplete'
 import { TextField, useTheme } from '@mui/material'
 

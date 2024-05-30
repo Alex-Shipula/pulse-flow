@@ -4,7 +4,9 @@ import Dialog from '@mui/material/Dialog'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SxProps, Theme, useTheme } from '@mui/material'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { DialogProps } from '@mui/material/Dialog'
 import { red } from '@mui/material/colors'
 
@@ -53,6 +55,7 @@ export default function CustomizedModal ({
         <Box
           display="flex"
           flexDirection="column"
+          minHeight={'300px'}
           padding={'24px'}
           gap={'30px'}
           sx={{

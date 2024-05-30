@@ -85,6 +85,9 @@ export const UserApi = createApi({
         method: 'DELETE'
       }),
       invalidatesTags: [{ type: 'User', id: 'LIST' }]
+    }),
+    getMe: builder.query<IUser, void>({
+      query: () => '/me'
     })
   })
 })
@@ -94,17 +97,26 @@ export const {
   useSearchUserQuery,
   useGetUserQuery,
   useUpdateUserMutation,
-  useDeleteUserMutation
+  useDeleteUserMutation,
+  useGetMeQuery
 } = UserApi
 
 interface UserState {
-  user: IUser[]
+  users: IUser[]
   email: string
+  currentUser: IUser
 }
 
 const initialState: UserState = {
-  user: [],
-  email: ''
+  users: [],
+  email: '',
+  currentUser: {
+    id: '',
+    name: '',
+    surname: '',
+    email: '',
+    disabled: false
+  }
 }
 
 const userSlice = createSlice({
@@ -112,17 +124,21 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUserState: (state, action: PayloadAction<IUser[]>) => {
-      state.user = action.payload
+      state.users = action.payload
     },
     setEmailState: (state, action: PayloadAction<string>) => {
       state.email = action.payload
+    },
+    setCurrentUserState: (state, action: PayloadAction<IUser>) => {
+      state.currentUser = action.payload
     }
   }
 })
 
-export const { setUserState, setEmailState } = userSlice.actions
+export const { setUserState, setEmailState, setCurrentUserState } = userSlice.actions
 
-export const selectUserState = (state: RootState) => state?.users.user
+export const selectUserState = (state: RootState) => state?.users.users
 export const selectEmailState = (state: RootState) => state?.users.email
+export const selectCurrentUserState = (state: RootState) => state?.users.currentUser
 
 export default userSlice.reducer

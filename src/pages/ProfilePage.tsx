@@ -1,29 +1,19 @@
 import React, { useEffect } from 'react'
-import { Box, IconButton, InputAdornment, Typography, useTheme } from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
-import { setUserState, useSearchUserQuery, selectUserState, selectEmailState } from 'src/store/users'
-import { useDispatch, useSelector } from 'react-redux'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useGetMeQuery, IUser, setCurrentUserState } from 'src/store/users'
+import { useDispatch } from 'react-redux'
 import CustomizedInput from 'src/components/CustomizedInput'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch()
   const theme = useTheme()
-  const userEmail = useSelector(selectEmailState)
-  const searchUser: any = userEmail && useSearchUserQuery({ email: userEmail })?.data
-  const user = useSelector(selectUserState)?.[0]
-
-  const [showPassword, setShowPassword] = React.useState(false)
+  const { data } = useGetMeQuery()
 
   useEffect(() => {
-    searchUser && dispatch(setUserState(searchUser))
-  }, [searchUser])
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show)
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-  }
+    data && dispatch(setCurrentUserState(data))
+  }, [data])
 
   return (
     <WrapperPage>
@@ -47,7 +37,7 @@ const ProfilePage: React.FC = () => {
             marginBottom: '4.5px'
           }}>Name</Typography>
           <CustomizedInput
-            value={user?.name}
+            value={data?.name}
             type='text'
             placeholder='Enter Name'
           />
@@ -62,7 +52,7 @@ const ProfilePage: React.FC = () => {
             marginBottom: '4.5px'
           }}>SurName</Typography>
           <CustomizedInput
-            value={user?.surname}
+            value={data?.surname}
             type='text'
             placeholder='Enter SurName'
           />
@@ -77,38 +67,9 @@ const ProfilePage: React.FC = () => {
             marginBottom: '4.5px'
           }}>Email</Typography>
           <CustomizedInput
-            value={user?.email}
+            value={data?.email}
             type='text'
             placeholder='Enter Email'
-          />
-        </Box>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flexStart'
-        }}>
-          <Typography variant='body1' sx={{
-            color: theme.palette.text.primary,
-            marginBottom: '4.5px'
-          }}>Password</Typography>
-          <CustomizedInput
-            placeholder='Enter Password'
-            value={user?.password}
-            id="filled-adornment-password"
-            type={showPassword ? 'text' : 'password'}
-            InputProps={{
-              endAdornment:
-                    < InputAdornment position="end" >
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-            }}
           />
         </Box>
       </Box>

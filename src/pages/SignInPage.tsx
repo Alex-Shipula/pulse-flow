@@ -65,7 +65,7 @@ const SignInPage: React.FC = () => {
         email,
         disabled: false
       }
-      await axios.post(`${serverURL}/user`, authObject)
+      await axios.post(`${serverURL}/api/user`, authObject)
         .then((res) => {
           if (res?.data) {
             setSignUp(false)
@@ -82,7 +82,7 @@ const SignInPage: React.FC = () => {
         email,
         password
       }
-      await axios.post(`${serverURL}/auth/login`, authObject)
+      await axios.post(`${serverURL}/api/auth/login`, authObject)
         .then((res) => {
           if (res?.data?.token) {
             dispatch(setEmailState(email))
