@@ -42,7 +42,7 @@ export default function CustomizedModal ({
         '& .MuiDialog-container .MuiPaper-root': {
           width: '100%',
           maxWidth,
-          borderRadius: '4px',
+          borderRadius: '10px',
           overflow: 'hidden'
         },
         ...sx

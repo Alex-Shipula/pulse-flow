@@ -5,7 +5,7 @@ import { serverURL } from 'src/config'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RootState } from '.'
 
-interface RequestEmployee {
+export interface RequestEmployee {
   user?: number
   company?: number
   is_project_manager: boolean
@@ -37,10 +37,10 @@ interface UpdateEmployee {
 }
 
 interface SearchEmployeeRequest {
-  id?: string
+  id?: number
   is_project_manager: boolean
   disabled: boolean
-  company?: string
+  company?: number
   order_by?: '-id' | 'id' | 'user' | '-user' | 'company' | '-company'
 }
 
@@ -70,7 +70,7 @@ export const EmployeeApi = createApi({
       query: (params) => ({
         url: '/search',
         method: 'GET',
-        body: params
+        ...params
       }),
       providesTags: [{ type: 'Employee', id: 'LIST' }]
     }),

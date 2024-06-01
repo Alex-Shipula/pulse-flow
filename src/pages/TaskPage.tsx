@@ -4,6 +4,11 @@ import WrapperPage from 'src/components/WrapperPage'
 import KanbanBoard from 'src/components/kanban/KanbanBoard'
 import CustomizedInput from 'src/components/CustomizedInput'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import { useSelector } from 'react-redux'
+import { selectCurrentCompany } from 'src/store/company'
+import { useLocation } from 'react-router-dom'
+import { selectProjectState } from 'src/store/project'
+import { selectTaskState } from 'src/store/task'
 
 const ChatTextMessage = ({ message }: { message: string }) => {
   return (
@@ -27,6 +32,12 @@ const ChatTextMessage = ({ message }: { message: string }) => {
 }
 
 const TaskPage: React.FC = () => {
+  const currentCompany = useSelector(selectCurrentCompany)
+  const projectId = useLocation().pathname.split('/')[2]
+  const currentProject = useSelector(selectProjectState).filter(project => project.id === Number(projectId))[0]
+  const tasksState = useSelector(selectTaskState)
+  console.log('tasksState', tasksState, currentCompany)
+
   const [chatMessages, setChatMessages] = React.useState<string[]>([])
   const [message, setMessage] = React.useState('')
 
@@ -51,6 +62,23 @@ const TaskPage: React.FC = () => {
         <Typography fontSize={30} >
           Task Page
         </Typography>
+        {currentProject && <Box
+          width={'1050px'}
+          height={'fit-content'}
+          sx={{
+            backgroundColor: 'aliceblue',
+            borderRadius: '10px',
+            border: '3px solid #e0e0e0',
+            padding: '15px',
+            marginTop: '16px',
+            overflow: 'hidden',
+            whiteSpace: 'break-word',
+            wordWrap: 'break-word'
+          }}>
+          <Typography fontSize={18} >
+            {currentProject?.description}
+          </Typography>
+        </Box>}
         <Box
           width={'100%'}
           display={'flex'}

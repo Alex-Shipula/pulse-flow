@@ -3,8 +3,9 @@ import styled from '@emotion/styled'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd'
 import TaskCard from './TaskCard'
-import { IKanbanColumns, kanbanColumns } from './kanbanData'
+import { kanbanColumns } from './kanbanData'
 import { Box } from '@mui/material'
+import { IKanbanColumns } from 'src/store/task'
 
 const Container = styled.div`
   display: flex;
@@ -97,7 +98,7 @@ const KanbanBoard = () => {
       >
         <Container>
           <TaskColumnStyles>
-            {Object.entries(columns).map(([columnId, column], index) => {
+            {Object.entries(columns).map(([columnId, column]: any, index) => {
               return (
                 <Droppable key={columnId} droppableId={columnId}>
                   {(provided, snapshot) => (
@@ -106,7 +107,7 @@ const KanbanBoard = () => {
                       {...provided.droppableProps}
                     >
                       <Title>{column.title}</Title>
-                      {column.items.map((item, index) => (
+                      {column.items.map((item: any, index: number) => (
                         <Box
                           key={item?.id}
                         >

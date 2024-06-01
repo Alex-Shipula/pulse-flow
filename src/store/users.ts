@@ -25,7 +25,7 @@ export interface IUser {
 interface SearchUserRequest {
   email: string
   disabled?: boolean
-  id?: string
+  id?: number
   order_by?: '-id' | 'id'
 }
 
@@ -60,7 +60,7 @@ export const UserApi = createApi({
       query: (params) => ({
         url: '/search',
         method: 'POST',
-        body: params
+        ...params
       }),
       providesTags: [{ type: 'User', id: 'LIST' }]
     }),

@@ -14,7 +14,7 @@ interface RequestCompany {
 }
 
 export interface ICompany {
-  id?: number
+  id: number
   name: string
   unique_identifier: string
   website?: string
@@ -28,7 +28,7 @@ interface UpdateCompany {
 }
 
 interface SearchCompanyRequest {
-  id?: string
+  id?: number
   name?: string
   order_by?: '-id' | 'id' | '-name' | 'name' |'-unique_identifier' | 'unique_identifier'
 }
@@ -59,7 +59,7 @@ export const CompanyApi = createApi({
       query: (params) => ({
         url: '/search',
         method: 'GET',
-        body: params
+        ...params
       }),
       providesTags: [{ type: 'Company', id: 'LIST' }]
     }),
@@ -77,7 +77,7 @@ export const CompanyApi = createApi({
       }),
       invalidatesTags: [{ type: 'Company', id: 'LIST' }]
     }),
-    getMe: builder.query<ICompany, void>({
+    getMeCompany: builder.query<ICompany[], void>({
       query: () => ({
         url: '/me',
         method: 'GET'
@@ -91,7 +91,7 @@ export const {
   useSearchCompanyQuery,
   useGetCompanyQuery,
   useUpdateCompanyMutation,
-  useGetMeQuery
+  useGetMeCompanyQuery
 } = CompanyApi
 
 interface CompanyState {

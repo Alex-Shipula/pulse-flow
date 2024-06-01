@@ -32,14 +32,7 @@ export const kanbanData: IKanbanData[] = [
   }
 ]
 
-export interface IKanbanColumns {
-  [key: string]: {
-    title: string
-    items: IKanbanData[]
-  }
-}
-
-export const kanbanColumns: IKanbanColumns = {
+export const kanbanColumns: any = {
   toDo: {
     title: 'To-do',
     items: kanbanData

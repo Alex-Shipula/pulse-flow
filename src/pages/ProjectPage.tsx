@@ -1,16 +1,34 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
 import { useNavigate } from 'react-router-dom'
 import { CompanyItem } from 'src/components/items/CompanyItem'
 import CustomizedModal from 'src/components/CustomizedModal'
 import CustomizedInput from 'src/components/CustomizedInput'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectCurrentCompany } from 'src/store/company'
+import { selectProjectState, setProjectState, useCreateProjectMutation, useSearchProjectQuery } from 'src/store/project'
+import { formatDate } from 'src/components/utils/formatDate'
+import CustomizedDatePickers from 'src/components/CustomizedDatePickers'
 
 const ProjectPage: React.FC = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const currentCompany = useSelector(selectCurrentCompany)
+  const projects = useSearchProjectQuery({ company: currentCompany?.id })?.data
+  const [createProject] = useCreateProjectMutation()
+  const projectsState = useSelector(selectProjectState)
+
   const [openModal, setOpenModal] = React.useState(false)
-  const [namуProject, setNameProject] = React.useState('')
+  const [nameProject, setNameProject] = React.useState('')
   const [description, setDescription] = React.useState('')
+  const [startDate, setStartDate] = React.useState<Date>(new Date())
+  const [endDate, setEndDate] = React.useState<Date>(new Date())
+  const [income, setIncome] = React.useState<number>()
+
+  useEffect(() => {
+    projects && dispatch(setProjectState(projects))
+  }, [projects, currentCompany])
 
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -28,12 +46,34 @@ const ProjectPage: React.FC = () => {
     setDescription(e.target.value)
   }
 
-  const handleCreateProject = () => {
-    console.log('Create Project')
+  const handleCreateProject = async () => {
+    currentCompany && await createProject({
+      name: nameProject,
+      description,
+      company: currentCompany.id,
+      start_date: startDate,
+      end_date: endDate,
+      income
+    })
+      .then(() => {
+        handleCloseModal()
+      })
   }
 
-  const handleClick = (id: string) => {
+  const handleClick = (id: number) => {
     navigate(`/task/${id}`)
+  }
+
+  const handleChangeStartDate = (date: Date) => {
+    setStartDate(date)
+  }
+
+  const handleChangeEndDate = (date: Date) => {
+    setEndDate(date)
+  }
+
+  const handleChangeIncome = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIncome(Number(e.target.value))
   }
 
   return (
@@ -49,13 +89,19 @@ const ProjectPage: React.FC = () => {
           <Typography fontSize={30} >
             Проекти
           </Typography>
-          <Typography fontSize={20} >
-            Створюй свої проекти та долучайся до вже існуючих
-          </Typography>
-          <Typography fontSize={20} >
-            Доступні проекти:
-          </Typography>
-          <Box
+          {currentCompany
+            ? <>
+              <Typography fontSize={20} >
+                Створюй свої проекти та долучайся до вже існуючих
+              </Typography>
+              <Typography fontSize={20} >
+                Доступні проекти:
+              </Typography>
+            </>
+            : <Typography fontSize={20} >
+              Оберіть компанію
+            </Typography>}
+          {currentCompany && <Box
             width={'300px'}
             display={'flex'}
             flexDirection={'column'}
@@ -63,12 +109,21 @@ const ProjectPage: React.FC = () => {
             alignItems={'start'}
             gap={'15px'}
           >
-            <Box onClick={() => handleClick('1')}>
-              <CompanyItem title={'Project 1'} />
-            </Box>
-            <Box onClick={() => handleClick('2')}>
-              <CompanyItem title={'Project 2'} />
-            </Box>
+            {projectsState?.length > 0 && projectsState.map((project) => {
+              const date = formatDate(project?.start_date).format2
+              return (<Box
+                key={project?.id}
+                display={'flex'}
+                alignItems={'center'}
+                gap={'15px'}
+                onClick={() => handleClick(project.id)}
+              >
+                <CompanyItem
+                  title={project?.name}
+                  subTitle={project?.description}
+                  info={date} />
+              </Box>)
+            })}
             <Button variant='contained' color='primary' sx={{
               width: '100%',
               marginTop: '20px'
@@ -77,7 +132,7 @@ const ProjectPage: React.FC = () => {
             >
               Створити новий проект
             </Button>
-          </Box>
+          </Box>}
         </Box>
       </WrapperPage>
       {openModal && <CustomizedModal
@@ -94,7 +149,7 @@ const ProjectPage: React.FC = () => {
           gap={'15px'}
         >
           <CustomizedInput
-            value={namуProject}
+            value={nameProject}
             onChange={handleChangeProject}
             type='text'
             placeholder='Назва проекту' />
@@ -105,6 +160,20 @@ const ProjectPage: React.FC = () => {
             type='text'
             placeholder='Опис проэкту' />
 
+          <CustomizedInput
+            value={income}
+            onChange={handleChangeIncome}
+            type='number'
+            placeholder='Дохід' />
+
+          <Box
+            display={'flex'}
+            alignItems={'center'}
+            gap={'8px'}
+          >
+            <CustomizedDatePickers placeholder='Початкова дата' value={startDate} onChange={handleChangeStartDate} />
+            <CustomizedDatePickers placeholder='Фінальна дата' value={endDate} onChange={handleChangeEndDate} />
+          </Box>
         </Box>
       </CustomizedModal>}
     </>

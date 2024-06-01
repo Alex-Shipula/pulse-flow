@@ -1,31 +1,32 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
 import { CompanyItem } from 'src/components/items/CompanyItem'
 import CustomizedModal from 'src/components/CustomizedModal'
 import CustomizedInput from 'src/components/CustomizedInput'
-import { setCurrentCompany, useCreateCompanyMutation, useGetMeQuery, useSearchCompanyQuery } from 'src/store/company'
-import { useDispatch, useSelector } from 'react-redux'
+import StarIcon from '@mui/icons-material/Star'
+import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ICompany, selectCompanyState, selectCurrentCompany,
+  setCompanyState, setCurrentCompany,
+  useCreateCompanyMutation
+} from 'src/store/company'
+import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentUserState } from 'src/store/users'
 import { useCreateEmployeeMutation } from 'src/store/employee'
 
 const CompanyPage: React.FC = () => {
   const dispatch = useDispatch()
-  const { data } = useGetMeQuery()
   const [createCompany] = useCreateCompanyMutation()
   const [createEmployee] = useCreateEmployeeMutation()
   const currentUser = useSelector(selectCurrentUserState)
-  const companies = useSearchCompanyQuery({ id: currentUser?.id })
-  console.log(currentUser, companies)
+  const companiesState = useSelector(selectCompanyState)
+  const currentCompany = useSelector(selectCurrentCompany)
 
   const [openModal, setOpenModal] = React.useState(false)
   const [nameCompany, setNameCompany] = React.useState('')
   const [idCompany, setIdCompany] = React.useState('')
   const [webCompany, setWebCompany] = React.useState('')
-
-  useEffect(() => {
-    data && dispatch(setCurrentCompany(data))
-  }, [data])
 
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -41,15 +42,18 @@ const CompanyPage: React.FC = () => {
     formData.append('unique_identifier', idCompany)
     formData.append('website', webCompany)
     await createCompany(formData).then(async (res: any) => {
+      const allCompanies = [...companiesState, res?.data]
+      dispatch(setCompanyState(allCompanies))
       const data: any = {
         user: currentUser?.id,
-        company: res?.id,
+        company: res?.data?.id,
         is_project_manager: true,
         disabled: false
       }
-      await createEmployee(data)
+      await createEmployee(data).then(() => {
+        handleCloseModal()
+      })
     })
-    handleCloseModal()
   }
 
   const handleChangeCompany = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +66,10 @@ const CompanyPage: React.FC = () => {
 
   const handleChangeWebCompany = (e: React.ChangeEvent<HTMLInputElement>) => {
     setWebCompany(e.target.value)
+  }
+
+  const handleCurrentCompany = (company: ICompany) => {
+    dispatch(setCurrentCompany(company))
   }
 
   return (
@@ -93,8 +101,21 @@ const CompanyPage: React.FC = () => {
             alignItems={'start'}
             gap={'15px'}
           >
-            <CompanyItem title={'Company 1'} />
-            <CompanyItem title={'Company 2'} />
+            {companiesState?.length > 0 && companiesState.map((company) => (
+              <Box
+                key={company?.id}
+                display={'flex'}
+                alignItems={'center'}
+                gap={'15px'}
+                onClick={() => handleCurrentCompany(company)}
+              >
+                <CompanyItem
+                  title={company?.name}
+                  subTitle={company?.unique_identifier}
+                  info={company?.website ?? ''} />
+                {(currentCompany?.id === company?.id) && <StarIcon style={{ width: '40px', height: '40px' }} />}
+              </Box>
+            ))}
             <Button variant='contained' color='primary' sx={{
               width: '100%',
               marginTop: '20px'

@@ -1,11 +1,12 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 
-export const CompanyItem = ({ title }: { title: string }) => {
+export const CompanyItem = ({ title, subTitle, info }:
+{ title: string, subTitle?: string, info?: string }) => {
   return (
     <Box
       width={'300px'}
-      height={'90px'}
+      height={'100px'}
       display={'flex'}
       justifyContent={'center'}
       alignItems={'center'}
@@ -21,7 +22,18 @@ export const CompanyItem = ({ title }: { title: string }) => {
         backgroundColor: 'rgba(243, 245, 249, .5)'
       }}
     >
-      <Typography fontSize={20}>{title}</Typography>
+      <Box
+        display={'flex'}
+        flexDirection={'column'}
+        justifyContent={'center'}
+        alignItems={'center'}
+        gap={'3px'}
+        overflow={'hidden'}
+      >
+        <Typography fontSize={20}>{title}</Typography>
+        <Typography fontSize={14}>{subTitle}</Typography>
+        <Typography fontSize={10}>{info}</Typography>
+      </Box>
     </Box>
   )
 }
