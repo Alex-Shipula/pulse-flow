@@ -23,7 +23,7 @@ const ProjectPage: React.FC = () => {
   const [nameProject, setNameProject] = React.useState('')
   const [description, setDescription] = React.useState('')
   const [startDate, setStartDate] = React.useState<Date>(new Date())
-  const [endDate, setEndDate] = React.useState<Date>(new Date())
+  const [endDate, setEndDate] = React.useState<Date | null>(null)
   const [income, setIncome] = React.useState<number>()
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const ProjectPage: React.FC = () => {
       description,
       company: currentCompany.id,
       start_date: startDate,
-      end_date: endDate,
+      end_date: endDate ?? undefined,
       income
     })
       .then(() => {
@@ -99,7 +99,7 @@ const ProjectPage: React.FC = () => {
               </Typography>
             </>
             : <Typography fontSize={20} >
-              Оберіть компанію
+              Оберіть проект
             </Typography>}
           {currentCompany && <Box
             width={'300px'}

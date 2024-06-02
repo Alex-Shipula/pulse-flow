@@ -37,17 +37,19 @@ const CompanyPage: React.FC = () => {
   }
 
   const handleCreateCompany = async () => {
-    const formData = new FormData()
-    formData.append('name', nameCompany)
-    formData.append('unique_identifier', idCompany)
-    formData.append('website', webCompany)
-    await createCompany(formData).then(async (res: any) => {
+    const data = {
+      name: nameCompany,
+      unique_identifier: idCompany,
+      website: webCompany,
+      creator: currentUser?.id
+    }
+    await createCompany(data).then(async (res: any) => {
       const allCompanies = [...companiesState, res?.data]
       dispatch(setCompanyState(allCompanies))
       const data: any = {
         user: currentUser?.id,
         company: res?.data?.id,
-        is_project_manager: true,
+        is_admin: true,
         disabled: false
       }
       await createEmployee(data).then(() => {

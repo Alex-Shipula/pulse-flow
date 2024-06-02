@@ -76,15 +76,16 @@ interface SearchTaskRequest {
   actual_start_date?: string
   name?: string
   id?: number
-  order_by?: '-id' | 'id' | '-name' | 'name' |'-state' | 'state' |'-priority' |
-  'priority' |'-actual_start_date' | 'actual_start_date' |'-actual_end_date' |
-  'actual_end_date' |'-planned_start_date' | 'planned_start_date' |'-planned_end_date' | 'planned_end_date'
+  project?: number
+  order_by?: '-id' | 'id' | '-name' | 'name' | '-state' | 'state' | '-priority' |
+  'priority' | '-actual_start_date' | 'actual_start_date' | '-actual_end_date' |
+  'actual_end_date' | '-planned_start_date' | 'planned_start_date' | '-planned_end_date' | 'planned_end_date'
 }
 
 export const TaskApi = createApi({
   reducerPath: 'TaskApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: `${serverURL}/api/task`,
+    baseUrl: `${serverURL}/api`,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token')
       if (token) {
@@ -97,29 +98,28 @@ export const TaskApi = createApi({
   endpoints: (builder) => ({
     createTask: builder.mutation<RequestTask, ITask>({
       query: (task) => ({
-        url: '',
+        url: '/task',
         method: 'POST',
         body: task
       }),
       invalidatesTags: [{ type: 'Task', id: 'LIST' }]
     }),
     searchTask: builder.query<ITask[], SearchTaskRequest>({
-      query: (params) => ({
-        url: '/search',
-        method: 'POST',
-        ...params
+      query: ({ project }) => ({
+        url: `/task/search${project ? `?project=${project}` : ''}`,
+        method: 'GET'
       }),
       providesTags: [{ type: 'Task', id: 'LIST' }]
     }),
     getTask: builder.query<ITask, string>({
       query: (taskId) => ({
-        url: `/${taskId}`,
+        url: `/task/${taskId}`,
         method: 'GET'
       })
     }),
-    updateTask: builder.mutation<ITask, { task: PutTask, taskId: string }>({
+    updateTask: builder.mutation<ITask, { task: PutTask, taskId: number }>({
       query: ({ task, taskId }) => ({
-        url: `/${taskId}`,
+        url: `/task/${taskId}`,
         method: 'PUT',
         body: task
       }),
@@ -128,8 +128,39 @@ export const TaskApi = createApi({
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
     deleteTask: builder.mutation<void, string>({
       query: (taskId: string) => ({
-        url: `/${taskId}`,
+        url: `/task/${taskId}`,
         method: 'DELETE'
+      }),
+      invalidatesTags: [{ type: 'Task', id: 'LIST' }]
+    }),
+    assignedCanChange: builder.query({
+      query: (taskId: number) => ({
+        url: `/assigned/can_change/${taskId}`,
+        method: 'GET'
+      })
+    }),
+    editAssigned: builder.mutation({
+      query: (params: { taskId: number, rate_type: string, rate: number, hours_spent: number }) => ({
+        url: `/assigned/${params.taskId}`,
+        method: 'PUT',
+        body: {
+          rate_type: params.rate_type,
+          rate: params.rate,
+          hours_spent: params.hours_spent
+        }
+      }),
+      invalidatesTags: [{ type: 'Task', id: 'LIST' }]
+    }),
+    assignedTask: builder.mutation({
+      query: (params: { task: number, rate_type: string, rate: number, employee: number }) => ({
+        url: '/assigned',
+        method: 'POST',
+        body: {
+          task: params.task,
+          rate_type: params.rate_type,
+          rate: params.rate,
+          employee: params.employee
+        }
       }),
       invalidatesTags: [{ type: 'Task', id: 'LIST' }]
     })
@@ -141,7 +172,10 @@ export const {
   useSearchTaskQuery,
   useGetTaskQuery,
   useUpdateTaskMutation,
-  useDeleteTaskMutation
+  useDeleteTaskMutation,
+  useAssignedCanChangeQuery,
+  useEditAssignedMutation,
+  useAssignedTaskMutation
 } = TaskApi
 
 export interface IKanbanColumns {
@@ -160,23 +194,23 @@ const initialState: TaskState = {
   tasks: [],
   kanbanColumns: {
     [EState.TODO]: {
-      title: 'To Do',
+      title: 'К виконанню',
       items: []
     },
     [EState.RESEARCH]: {
-      title: 'Research',
+      title: 'В пошуці',
       items: []
     },
     [EState.IN_PROGRESS]: {
-      title: 'In Progress',
+      title: 'В процессі',
       items: []
     },
     [EState.TESTING]: {
-      title: 'Testing',
+      title: 'Тестування',
       items: []
     },
     [EState.DONE]: {
-      title: 'Done',
+      title: 'Завершено',
       items: []
     }
   }

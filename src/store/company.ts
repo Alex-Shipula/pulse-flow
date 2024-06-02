@@ -6,7 +6,7 @@ import { serverURL } from 'src/config'
 import { RootState } from '.'
 
 interface RequestCompany {
-  id: number
+  id?: number
   name: string
   unique_identifier: string
   website: string
@@ -47,7 +47,7 @@ export const CompanyApi = createApi({
   }),
   tagTypes: ['Company'],
   endpoints: (builder) => ({
-    createCompany: builder.mutation<RequestCompany, FormData>({
+    createCompany: builder.mutation<ICompany, RequestCompany>({
       query: (company) => ({
         url: '',
         method: 'POST',
@@ -56,10 +56,9 @@ export const CompanyApi = createApi({
       invalidatesTags: [{ type: 'Company', id: 'LIST' }]
     }),
     searchCompany: builder.query<ICompany[], SearchCompanyRequest>({
-      query: (params) => ({
+      query: () => ({
         url: '/search',
-        method: 'GET',
-        ...params
+        method: 'GET'
       }),
       providesTags: [{ type: 'Company', id: 'LIST' }]
     }),

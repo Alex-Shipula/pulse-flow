@@ -57,10 +57,9 @@ export const UserApi = createApi({
       invalidatesTags: [{ type: 'User', id: 'LIST' }]
     }),
     searchUser: builder.query<IUser[], SearchUserRequest>({
-      query: (params) => ({
-        url: '/search',
-        method: 'POST',
-        ...params
+      query: ({ email }) => ({
+        url: `/search${email ? `?email=${email}` : ''}`,
+        method: ' GET'
       }),
       providesTags: [{ type: 'User', id: 'LIST' }]
     }),

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Button, Typography, useTheme } from '@mui/material'
 import { ReactComponent as Logo } from '../assets/logo-pulse-flow.svg'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -8,35 +8,64 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentCompany } from 'src/store/company'
 import CustomizedModal from './CustomizedModal'
 import CustomizedInput from './CustomizedInput'
-import { selectTaskState, setTaskState, useCreateTaskMutation } from 'src/store/task'
-import { useCreateEmployeeMutation } from 'src/store/employee'
-import { selectCurrentUserState } from 'src/store/users'
+import { setTaskState, useCreateTaskMutation } from 'src/store/task'
 import CustomizedDatePickers from './CustomizedDatePickers'
+import { useProjectIsPmQuery } from 'src/store/project'
+import { useEmployeeInvateMutation } from 'src/store/employee'
+import axios from 'axios'
+import { serverURL } from 'src/config'
 
 const items = ['ЗАВДАННЯ', 'МОЯ КОМАНДА']
 
 const TopMiniBar = () => {
   const theme = useTheme()
-  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const location = useLocation()
   const [createTask] = useCreateTaskMutation()
-  const [createEmployee] = useCreateEmployeeMutation()
+  const [inviteEmployee] = useEmployeeInvateMutation()
   const projectId = location.pathname.split('/')[2]
   const currentCompany = useSelector(selectCurrentCompany)
-  const currentUser = useSelector(selectCurrentUserState)
-  const tasksState = useSelector(selectTaskState)
+  const { data: isProjectManager } = useProjectIsPmQuery(projectId)
 
   const [openModal, setOpenModal] = React.useState(false)
   const [nameTask, setNameTask] = React.useState('')
   const [descriptionTask, setDescriptionTask] = React.useState('')
   const [startDate, setStartDate] = React.useState<Date>(new Date())
-  const [endDate, setEndDate] = React.useState<Date>(new Date())
+  const [endDate, setEndDate] = React.useState<Date | null>(null)
+  const [searchEmail, setSearchEmail] = React.useState<string>('')
+  const [modalMode, setModalMode] = React.useState<string>('begin')
+
+  const getTasksRemote = async (projectId: string) => {
+    const token = localStorage.getItem('token') ?? ''
+    await axios.get(`${serverURL}/api/task/search?project=${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => {
+      if (res?.data) {
+        dispatch(setTaskState(res.data))
+      }
+    }).catch(() => {
+      console.log('error')
+    })
+  }
+
+  useEffect(() => {
+    if (projectId) {
+      // eslint-disable-next-line no-void
+      void getTasksRemote(projectId)
+    }
+  }, [projectId])
 
   const routerList = [
     `/task/${projectId}`,
     `/team/${projectId}`
   ]
+
+  const handleRefresh = () => {
+    navigate(location.pathname)
+  }
 
   const handleNavigate = () => {
     navigate('/')
@@ -48,6 +77,11 @@ const TopMiniBar = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false)
+    setModalMode('begin')
+    setDescriptionTask('')
+    setNameTask('')
+    setStartDate(new Date())
+    setEndDate(null)
   }
 
   const handleChangeNameTask = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +100,18 @@ const TopMiniBar = () => {
     setEndDate(date)
   }
 
+  const handleChangeEmployeeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchEmail(e.target.value)
+  }
+
+  const handleAddTaskMode = () => {
+    setModalMode('task')
+  }
+
+  const handleAddEmployeeMode = () => {
+    setModalMode('employee')
+  }
+
   const handleCreateTask = async () => {
     const data: any = {
       state: 'todo',
@@ -76,22 +122,20 @@ const TopMiniBar = () => {
       planned_end_date: endDate,
       project: projectId
     }
-    await createTask(data).then((res: any) => {
-      dispatch(setTaskState([...tasksState, res?.data]))
+    await createTask(data).then(() => {
       handleCloseModal()
+      handleRefresh()
+      // eslint-disable-next-line no-void
+      void getTasksRemote(projectId)
     })
+    setModalMode('begin')
   }
 
   const handleAddEmployee = async () => {
-    const data: any = {
-      user: currentUser?.id,
-      company: currentCompany?.id,
-      is_project_manager: false,
-      disabled: false
-    }
-    await createEmployee(data).then(() => {
+    await inviteEmployee({ email: searchEmail, company_id: Number(currentCompany?.id) }).then(() => {
       handleCloseModal()
     })
+    setModalMode('begin')
   }
 
   return (
@@ -187,7 +231,8 @@ const TopMiniBar = () => {
       {openModal && <CustomizedModal
         title={'Створення нової задачі'}
         handleClose={handleCloseModal}
-        action={handleCreateTask}
+        action={modalMode === 'task' ? handleCreateTask
+          : modalMode === 'employee' ? handleAddEmployee : () => { return null }}
         open={openModal}
       >
         <Box
@@ -197,27 +242,55 @@ const TopMiniBar = () => {
           justifyContent={'center'}
           gap={'15px'}
         >
-          <CustomizedInput
-            value={nameTask}
-            onChange={handleChangeNameTask}
-            type='text'
-            placeholder='Назва задачі' />
+          {modalMode === 'task' &&
+            <>
+              <CustomizedInput
+                value={nameTask}
+                onChange={handleChangeNameTask}
+                type='text'
+                placeholder='Назва задачі' />
 
-          <CustomizedInput
-            value={descriptionTask}
-            onChange={handleChangeDescriptionTask}
-            type='text'
-            placeholder='Опис задачі' />
+              <CustomizedInput
+                value={descriptionTask}
+                onChange={handleChangeDescriptionTask}
+                type='text'
+                placeholder='Опис задачі' />
 
-          <Box
-            display={'flex'}
-            alignItems={'center'}
-            gap={'8px'}
-          >
-            <CustomizedDatePickers placeholder='Початкова дата' value={startDate} onChange={handleChangeStartDate} />
-            <CustomizedDatePickers placeholder='Фінальна дата' value={endDate} onChange={handleChangeEndDate} />
-          </Box>
+              <Box
+                display={'flex'}
+                alignItems={'center'}
+                gap={'8px'}
+              >
+                <CustomizedDatePickers placeholder='Початкова дата' value={startDate} onChange={handleChangeStartDate} />
+                <CustomizedDatePickers placeholder='Фінальна дата' value={endDate} onChange={handleChangeEndDate} />
+              </Box>
+            </>}
+          {modalMode === 'employee' && isProjectManager &&
+            <CustomizedInput
+              value={searchEmail}
+              onChange={handleChangeEmployeeEmail}
+              type='text'
+              placeholder='Імейл користувача' />}
 
+          {modalMode === 'begin' &&
+            <>
+              <Button variant='contained' color='primary' sx={{
+                width: '100%',
+                marginTop: '20px'
+              }}
+              onClick={handleAddTaskMode}
+              >
+                Додати задачу
+              </Button>
+              {isProjectManager && <Button variant='contained' color='primary' sx={{
+                width: '100%',
+                marginTop: '20px'
+              }}
+              onClick={handleAddEmployeeMode}
+              >
+                Додати юзера по імейлу
+              </Button>}
+            </>}
         </Box>
       </CustomizedModal>}
     </>

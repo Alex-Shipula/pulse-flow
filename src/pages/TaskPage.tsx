@@ -1,16 +1,19 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Box, IconButton, InputAdornment, Typography } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
 import KanbanBoard from 'src/components/kanban/KanbanBoard'
 import CustomizedInput from 'src/components/CustomizedInput'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { useSelector } from 'react-redux'
-import { selectCurrentCompany } from 'src/store/company'
 import { useLocation } from 'react-router-dom'
-import { selectProjectState } from 'src/store/project'
-import { selectTaskState } from 'src/store/task'
+import { selectProjectState, useGetProjectFinanceQuery } from 'src/store/project'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { IKanbanColumns, ITask, selectKanbanColumns, selectTaskState, useSearchTaskQuery } from 'src/store/task'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { IChat, useCreateChatMutation, useSearchChatQuery } from 'src/store/chat'
+import { selectCurrentUserState } from 'src/store/users'
 
-const ChatTextMessage = ({ message }: { message: string }) => {
+const ChatTextMessage = ({ message }: { message: IChat }) => {
   return (
     <Box
       sx={{
@@ -24,31 +27,68 @@ const ChatTextMessage = ({ message }: { message: string }) => {
         wordWrap: 'break-word'
       }}
     >
-      <Typography>
-        {message}
-      </Typography>
+      <Box
+        display={'flex'}
+        justifyContent={'space-between'}
+        alignItems={'center'}
+        gap={'15px'}
+        overflow={'hidden'}
+        sx={{
+          width: '100%',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word'
+        }}
+      >
+        <Typography fontSize={'8px'}>
+          {message?.user?.email}
+        </Typography>
+        <Typography fontSize={'12px'}>
+          {message?.text}
+        </Typography>
+      </Box>
     </Box>
   )
 }
 
 const TaskPage: React.FC = () => {
-  const currentCompany = useSelector(selectCurrentCompany)
+  const [createMesaage] = useCreateChatMutation()
   const projectId = useLocation().pathname.split('/')[2]
+  const currentUser = useSelector(selectCurrentUserState)
+  const projectFinance = useGetProjectFinanceQuery(projectId)?.data
+  const chatMessagesRemote: IChat[] | undefined = useSearchChatQuery(projectId ? projectId.toString() : '')?.data
   const currentProject = useSelector(selectProjectState).filter(project => project.id === Number(projectId))[0]
   const tasksState = useSelector(selectTaskState)
-  console.log('tasksState', tasksState, currentCompany)
+  const { data, isLoading } = useSearchTaskQuery({ project: Number(projectId) })
+  const kanbanColumnsState = useSelector(selectKanbanColumns)
 
-  const [chatMessages, setChatMessages] = React.useState<string[]>([])
   const [message, setMessage] = React.useState('')
+
+  const kanbanColumns = () => {
+    const kanban: IKanbanColumns = JSON.parse(JSON.stringify(kanbanColumnsState))
+    tasksState && tasksState?.length > 0 && tasksState?.forEach((task: ITask) => {
+      kanban[task?.state]?.items?.push(task)
+    })
+    return kanban
+  }
 
   const handleSetMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value)
   }
 
+  const handleCreateMessage = async () => {
+    await createMesaage({ project: Number(projectId), text: message, user: Number(currentUser?.id) })
+  }
+
   const handlePushMessage = () => {
-    setChatMessages([...chatMessages, message])
+    // eslint-disable-next-line no-void
+    void handleCreateMessage()
     setMessage('')
   }
+
+  const KanbanTable = useMemo(() => {
+    const kanban = kanbanColumns()
+    return <KanbanBoard kanbanColumns={kanban} />
+  }, [isLoading, kanbanColumnsState, tasksState, data])
 
   return (
     <WrapperPage>
@@ -63,7 +103,7 @@ const TaskPage: React.FC = () => {
           Task Page
         </Typography>
         {currentProject && <Box
-          width={'1050px'}
+          width={'1045px'}
           height={'fit-content'}
           sx={{
             backgroundColor: 'aliceblue',
@@ -85,7 +125,7 @@ const TaskPage: React.FC = () => {
           justifyContent={'space-between'}
           alignItems={'start'}>
 
-          <KanbanBoard />
+          {!isLoading && KanbanTable}
           <Box
             display={'flex'}
             flexDirection={'column'}
@@ -111,9 +151,10 @@ const TaskPage: React.FC = () => {
                 gap: '8px'
               }}
             >
-              {chatMessages?.map((message, index) => (
-                <ChatTextMessage key={index} message={message} />
-              ))}
+              {chatMessagesRemote && chatMessagesRemote?.length > 0 &&
+                chatMessagesRemote?.map((message: any, index: number) => (
+                  <ChatTextMessage key={index} message={message} />
+                ))}
             </Box>
             <CustomizedInput
               value={message}
@@ -142,6 +183,36 @@ const TaskPage: React.FC = () => {
             />
           </Box>
         </Box>
+        {projectFinance && <Box
+          width={'1045px'}
+          height={'fit-content'}
+          display={'flex'}
+          flexDirection={'column'}
+          justifyContent={'start'}
+          marginBottom={'30px'}
+          sx={{
+            backgroundColor: 'aliceblue',
+            borderRadius: '10px',
+            border: '3px solid #e0e0e0',
+            padding: '15px',
+            marginTop: '16px',
+            overflow: 'hidden',
+            whiteSpace: 'break-word',
+            wordWrap: 'break-word'
+          }}>
+          <Typography fontSize={18} >
+            Дохід {projectFinance?.income}
+          </Typography>
+          <Typography fontSize={18} >
+            Профіт {projectFinance?.profit}
+          </Typography>
+          <Typography fontSize={18} >
+            Начало {projectFinance?.start_date}
+          </Typography>
+          <Typography fontSize={18} >
+            Кінець {projectFinance?.end_date}
+          </Typography>
+        </Box>}
       </Box>
     </WrapperPage>
   )

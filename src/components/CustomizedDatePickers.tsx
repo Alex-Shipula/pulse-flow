@@ -38,6 +38,9 @@ const CustomizedDatePickers = styled(DateTimePicker)(`
   border-radius: 16px;
   padding: 10px 16px;
 }
+.MuiPaper-root{
+  background: #FFFFFF;
+}
 input{
   padding: 0;
   font-size: 16px;

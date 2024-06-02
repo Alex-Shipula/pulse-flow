@@ -43,7 +43,7 @@ interface SearchProjectRequest {
   id?: number
   income?: number
   name?: string
-  order_by?: '-id' | 'id' | '-name' | 'name' |'-start_date' | 'start_date' |'-end_date' | 'end_date' |'-income' | 'income'
+  order_by?: '-id' | 'id' | '-name' | 'name' | '-start_date' | 'start_date' | '-end_date' | 'end_date' | '-income' | 'income'
 }
 
 export const ProjectApi = createApi({
@@ -88,6 +88,18 @@ export const ProjectApi = createApi({
         body: project
       }),
       invalidatesTags: [{ type: 'Project', id: 'LIST' }]
+    }),
+    projectIsPm: builder.query<IProject, string>({
+      query: (projectId) => ({
+        url: `/is_pm/${projectId}`,
+        method: 'GET'
+      })
+    }),
+    getProjectFinance: builder.query({
+      query: (projectId: string) => ({
+        url: `/finance/${projectId}`,
+        method: 'GET'
+      })
     })
   })
 })
@@ -96,7 +108,9 @@ export const {
   useCreateProjectMutation,
   useSearchProjectQuery,
   useGetProjectQuery,
-  useUpdateProjectMutation
+  useUpdateProjectMutation,
+  useProjectIsPmQuery,
+  useGetProjectFinanceQuery
 } = ProjectApi
 
 interface ProjectState {
