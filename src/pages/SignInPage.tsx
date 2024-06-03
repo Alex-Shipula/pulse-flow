@@ -154,7 +154,7 @@ const SignInPage: React.FC = () => {
               <CustomizedInput
                 value={name}
                 type='text'
-                placeholder='Enter Name'
+                placeholder='Введить ім’я'
                 onChange={handleChangeName}
               />
             </Box>}
@@ -171,7 +171,7 @@ const SignInPage: React.FC = () => {
               <CustomizedInput
                 value={surname}
                 type='text'
-                placeholder='Enter SurName'
+                placeholder='Введить прізвище'
                 onChange={handleChangeSurName}
               />
             </Box>}
@@ -188,7 +188,7 @@ const SignInPage: React.FC = () => {
               <CustomizedInput
                 value={email}
                 type='email'
-                placeholder='Enter Email'
+                placeholder='Введить email'
                 onChange={handleChangeEmail}
               />
             </Box>
@@ -202,7 +202,7 @@ const SignInPage: React.FC = () => {
                 marginBottom: '4.5px'
               }}>Password</Typography>
               <CustomizedInput
-                placeholder='Enter Password'
+                placeholder='Введить пароль'
                 value={password}
                 onChange={handleChangePassword}
                 id="filled-adornment-password"

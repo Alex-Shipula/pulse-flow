@@ -21,7 +21,7 @@ const TeamPage: React.FC = () => {
         flexDirection={'column'}
         gap={'15px'}>
         <Typography fontSize={30} paddingBottom={'15px'}>
-          Team Page
+          {currentCompany ? 'Команда' : 'Ви не обрали компанію, щоб переглянути команду'}
         </Typography>
         {team && team?.length > 0 && team.map((user: IEmployee) => (
           <Box

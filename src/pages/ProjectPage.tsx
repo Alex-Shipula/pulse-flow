@@ -7,7 +7,7 @@ import CustomizedModal from 'src/components/CustomizedModal'
 import CustomizedInput from 'src/components/CustomizedInput'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentCompany } from 'src/store/company'
-import { selectProjectState, setProjectState, useCreateProjectMutation, useSearchProjectQuery } from 'src/store/project'
+import { setProjectState, useCreateProjectMutation, useSearchProjectQuery } from 'src/store/project'
 import { formatDate } from 'src/components/utils/formatDate'
 import CustomizedDatePickers from 'src/components/CustomizedDatePickers'
 
@@ -15,9 +15,9 @@ const ProjectPage: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const currentCompany = useSelector(selectCurrentCompany)
-  const projects = useSearchProjectQuery({ company: currentCompany?.id })?.data
+  const { data: allProjects, isLoading } = useSearchProjectQuery({ company: currentCompany?.id })
+  const getAllProjects = useSearchProjectQuery({ company: currentCompany?.id }).refetch
   const [createProject] = useCreateProjectMutation()
-  const projectsState = useSelector(selectProjectState)
 
   const [openModal, setOpenModal] = React.useState(false)
   const [nameProject, setNameProject] = React.useState('')
@@ -27,8 +27,8 @@ const ProjectPage: React.FC = () => {
   const [income, setIncome] = React.useState<number>()
 
   useEffect(() => {
-    projects && dispatch(setProjectState(projects))
-  }, [projects, currentCompany])
+    allProjects && dispatch(setProjectState(allProjects))
+  }, [allProjects, currentCompany])
 
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -55,7 +55,8 @@ const ProjectPage: React.FC = () => {
       end_date: endDate ?? undefined,
       income
     })
-      .then(() => {
+      .then(async () => {
+        await getAllProjects()
         handleCloseModal()
       })
   }
@@ -99,7 +100,7 @@ const ProjectPage: React.FC = () => {
               </Typography>
             </>
             : <Typography fontSize={20} >
-              Оберіть проект
+              Для створення проектів потрібно обрати компанію
             </Typography>}
           {currentCompany && <Box
             width={'300px'}
@@ -109,7 +110,8 @@ const ProjectPage: React.FC = () => {
             alignItems={'start'}
             gap={'15px'}
           >
-            {projectsState?.length > 0 && projectsState.map((project) => {
+            {!isLoading && allProjects &&
+              allProjects?.length > 0 && allProjects.map((project) => {
               const date = formatDate(project?.start_date).format2
               return (<Box
                 key={project?.id}

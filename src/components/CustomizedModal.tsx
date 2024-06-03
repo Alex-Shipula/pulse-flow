@@ -98,31 +98,31 @@ export default function CustomizedModal ({
           <Box
             sx={{
               cursor: 'pointer',
-              color: theme.palette.text.primary,
-              fontSize: '14px',
-              fontWeight: 600,
-              padding: '10px 20px',
-              borderRadius: '8px',
-              backgroundColor: theme.palette.primary.light
-            }}
-            onClick={handleOnClose}
-          >
-            Відминити
-          </Box>
-          <Box
-            sx={{
-              cursor: 'pointer',
               color: red[500],
               fontSize: '14px',
               fontWeight: 600,
               padding: '10px 20px',
               borderRadius: '8px',
-              backgroundColor: theme.palette.secondary.light,
+              backgroundColor: theme.palette.secondary.light
+            }}
+            onClick={handleOnClose}
+          >
+            Скасувати
+          </Box>
+          <Box
+            sx={{
+              cursor: 'pointer',
+              color: theme.palette.text.primary,
+              fontSize: '14px',
+              fontWeight: 600,
+              padding: '10px 20px',
+              borderRadius: '8px',
+              backgroundColor: theme.palette.primary.light,
               marginLeft: '20px'
             }}
             onClick={action}
           >
-              Зробити
+            Зробити
           </Box>
         </Box>
       </Box>

@@ -7,20 +7,21 @@ import CustomizedInput from 'src/components/CustomizedInput'
 import StarIcon from '@mui/icons-material/Star'
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ICompany, selectCompanyState, selectCurrentCompany,
-  setCompanyState, setCurrentCompany,
-  useCreateCompanyMutation
+  ICompany, selectCurrentCompany, setCurrentCompany,
+  useCreateCompanyMutation,
+  useGetMeCompanyQuery
 } from 'src/store/company'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectCurrentUserState } from 'src/store/users'
+import { useGetMeQuery } from 'src/store/users'
 import { useCreateEmployeeMutation } from 'src/store/employee'
 
 const CompanyPage: React.FC = () => {
   const dispatch = useDispatch()
   const [createCompany] = useCreateCompanyMutation()
   const [createEmployee] = useCreateEmployeeMutation()
-  const currentUser = useSelector(selectCurrentUserState)
-  const companiesState = useSelector(selectCompanyState)
+  const { data: user } = useGetMeQuery()
+  const { data: companyData, isLoading: isLoadingCompany } = useGetMeCompanyQuery()
+  const getCompanies = useGetMeCompanyQuery().refetch
   const currentCompany = useSelector(selectCurrentCompany)
 
   const [openModal, setOpenModal] = React.useState(false)
@@ -41,17 +42,16 @@ const CompanyPage: React.FC = () => {
       name: nameCompany,
       unique_identifier: idCompany,
       website: webCompany,
-      creator: currentUser?.id
+      creator: user?.id
     }
     await createCompany(data).then(async (res: any) => {
-      const allCompanies = [...companiesState, res?.data]
-      dispatch(setCompanyState(allCompanies))
       const data: any = {
-        user: currentUser?.id,
+        user: user?.id,
         company: res?.data?.id,
         is_admin: true,
         disabled: false
       }
+      await getCompanies()
       await createEmployee(data).then(() => {
         handleCloseModal()
       })
@@ -103,7 +103,8 @@ const CompanyPage: React.FC = () => {
             alignItems={'start'}
             gap={'15px'}
           >
-            {companiesState?.length > 0 && companiesState.map((company) => (
+            {!isLoadingCompany && companyData &&
+             companyData?.length > 0 && companyData.map((company) => (
               <Box
                 key={company?.id}
                 display={'flex'}

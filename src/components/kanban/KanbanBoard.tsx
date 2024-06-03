@@ -1,5 +1,5 @@
 /* eslint-disable no-void */
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import styled from '@emotion/styled'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd'
@@ -90,12 +90,6 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
     })
   }
 
-  useEffect(() => {
-    if (taskAssign?.id) {
-      void getAssignedCanChange(taskAssign?.id)
-    }
-  }, [taskAssign])
-
   const handleOpenModal = () => {
     setOpenModal(true)
   }
@@ -108,6 +102,7 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
 
   const handleChangeTask = (task: ITask) => {
     setTaskAssign(task)
+    void getAssignedCanChange(task?.id)
   }
 
   const handleUpdateAssignTask = async () => {

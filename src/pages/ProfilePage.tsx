@@ -41,11 +41,10 @@ const ProfilePage: React.FC = () => {
           <Typography variant='body1' sx={{
             color: theme.palette.text.primary,
             marginBottom: '4.5px'
-          }}>Name</Typography>
+          }}>Ім’я</Typography>
           <CustomizedInput
             value={currentUser?.name}
             type='text'
-            placeholder='Enter Name'
           />
         </Box>
         <Box sx={{
@@ -56,11 +55,10 @@ const ProfilePage: React.FC = () => {
           <Typography variant='body1' sx={{
             color: theme.palette.text.primary,
             marginBottom: '4.5px'
-          }}>SurName</Typography>
+          }}>Прізвище</Typography>
           <CustomizedInput
             value={currentUser?.surname}
             type='text'
-            placeholder='Enter SurName'
           />
         </Box>
         <Box sx={{
@@ -71,11 +69,10 @@ const ProfilePage: React.FC = () => {
           <Typography variant='body1' sx={{
             color: theme.palette.text.primary,
             marginBottom: '4.5px'
-          }}>Email</Typography>
+          }}>Імейл</Typography>
           <CustomizedInput
             value={currentUser?.email}
             type='text'
-            placeholder='Enter Email'
           />
         </Box>
       </Box>
