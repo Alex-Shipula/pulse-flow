@@ -14,7 +14,7 @@ interface RequestUser {
 }
 
 export interface IUser {
-  id?: string
+  id?: number
   name: string
   surname: string
   email: string
@@ -110,7 +110,7 @@ const initialState: UserState = {
   users: [],
   email: '',
   currentUser: {
-    id: '',
+    id: 0,
     name: '',
     surname: '',
     email: '',

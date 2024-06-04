@@ -22,7 +22,7 @@ const TeamPage: React.FC = () => {
 
   const [changedUser, setChangedUser] = React.useState<IEmployee | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
-  const isAdmin = team?.filter((employee: IEmployee) => employee?.id === user?.id)[0]?.is_admin
+  const isAdmin = team?.filter((employee: IEmployee) => employee?.user?.id === user?.id)[0]?.is_admin
   const isPm = changedUser?.project_manager === true
 
   const handleCloseModal = () => {

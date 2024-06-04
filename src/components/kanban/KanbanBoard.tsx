@@ -10,7 +10,6 @@ import {
   IKanbanColumns, ITask,
   RateOptions,
   useAssignedTaskMutation,
-  useGetEmployeeMeQuery,
   useUpdateTaskMutation
 } from 'src/store/task'
 import CustomizedInput from '../CustomizedInput'
@@ -72,13 +71,13 @@ const KanbanBoard = ({ kanbanColumns, handleGetTasksRemote }:
   const [columns, setColumns] = useState(kanbanColumns)
   const [openModal, setOpenModal] = useState(false)
   const [taskAssign, setTaskAssign] = useState(null as ITask | null)
-  const { data: employeeMe } = useGetEmployeeMeQuery(taskAssign ? taskAssign?.id : 0)
   const [isAssigned, setIsAssigned] = useState(false)
   const [salary, setSalary] = useState('fixed')
   const [sum, setSum] = useState('')
   const [quantity, setQuantity] = useState('')
   const [assignMode, setAssignMode] = useState(false)
   const [employee, setEmployee] = useState('')
+  const [employeeMe, setEmployeeMe] = useState(null as any)
 
   const getAssignedCanChange = async (taskId: number) => {
     const token = localStorage.getItem('token') ?? ''
@@ -95,17 +94,15 @@ const KanbanBoard = ({ kanbanColumns, handleGetTasksRemote }:
     })
   }
 
-  const getEmployee = async (employeeId: number) => {
+  const getEmployeeMe = async (taskId: number) => {
     const token = localStorage.getItem('token') ?? ''
-    await axios.get(`${serverURL}/api/employee/${employeeId}`, {
+    await axios.get(`${serverURL}/api/employee/me/${taskId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     }).then((res: any) => {
       if (res?.data) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const user = `${res.data?.user?.name}  ${res.data?.user?.surname} / ${res.data?.user?.email}`
-        setEmployee(user)
+        setEmployeeMe(res.data)
       }
     }).catch(() => {
       console.log('error')
@@ -128,7 +125,16 @@ const KanbanBoard = ({ kanbanColumns, handleGetTasksRemote }:
 
   useEffect(() => {
     if (taskAssign?.assigned?.length > 0) {
-      void getEmployee(taskAssign?.assigned[0]?.employee)
+      const userObj = taskAssign?.assigned[0]?.employee?.user
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      const user = `${userObj?.name}  ${userObj?.surname} / ${userObj?.email}`
+      setEmployee(user)
+    }
+  }, [taskAssign])
+
+  useEffect(() => {
+    if (taskAssign?.id) {
+      void getEmployeeMe(taskAssign?.id)
     }
   }, [taskAssign])
 
@@ -146,6 +152,7 @@ const KanbanBoard = ({ kanbanColumns, handleGetTasksRemote }:
     setQuantity('')
     setAssignMode(false)
     setEmployee('')
+    setEmployeeMe(null)
   }
 
   const handleChangeTask = (task: ITask) => {
