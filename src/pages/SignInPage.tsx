@@ -56,7 +56,7 @@ const SignInPage: React.FC = () => {
     // setError('')
 
     if (!email || !password || (signUp && (!name || !surname))) {
-      setError('Email, password, name, surname are required')
+      setError('Заповніть всі поля')
     } else if (signUp && name && password && surname) {
       const authObject = {
         name,
@@ -75,7 +75,7 @@ const SignInPage: React.FC = () => {
           }
         })
         .catch((err) => {
-          setError(err?.response?.data?.message || 'Something went wrong')
+          setError(err?.response?.data?.message || 'Введено неправильні дані')
         })
     } else if (!signUp && email && password) {
       const authObject = {
@@ -94,7 +94,7 @@ const SignInPage: React.FC = () => {
           }
         })
         .catch((err) => {
-          setError(err?.response?.data?.message || 'Something went wrong')
+          setError(err?.response?.data?.message || 'Невірні облікові дані')
         })
     }
   }
@@ -133,7 +133,7 @@ const SignInPage: React.FC = () => {
               marginTop: '8px',
               color: theme.palette.text.primary
             }}
-          >{!signUp ? 'Sign In' : 'Sign Up'}</Box>
+          >{!signUp ? 'Авторизуватися' : 'Зареєструватися'}</Box>
 
           <Box sx={{
             display: 'flex',
@@ -230,8 +230,8 @@ const SignInPage: React.FC = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center'
-          }}>{signUp ? 'You have account' : 'You not have account?'}
-            <Button onClick={handleSetUp}>{signUp ? 'Sign In' : 'Sign Up'}</Button>
+          }}>{signUp ? 'Ви маєте аккаунт' : 'Ви не маєте аккаунт?'}
+            <Button onClick={handleSetUp}>{signUp ? 'Авторизуватися' : 'Зареєструватися'}</Button>
           </Typography>
 
           {error && <Typography variant='body1' sx={{
@@ -258,7 +258,7 @@ const SignInPage: React.FC = () => {
                 textTransform: 'capitalize',
                 color: theme.palette.text.primary
               }}
-            >{!signUp ? 'Sign In' : 'Sign Up'}</Typography>
+            >{!signUp ? 'Авторизуватися' : 'Зареєструватися'}</Typography>
           </Button>
         </Box>
       </CustomizedModal >

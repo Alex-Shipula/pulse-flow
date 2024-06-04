@@ -28,6 +28,7 @@ const CompanyPage: React.FC = () => {
   const [nameCompany, setNameCompany] = React.useState('')
   const [idCompany, setIdCompany] = React.useState('')
   const [webCompany, setWebCompany] = React.useState('')
+  const [error, setError] = React.useState('')
 
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -35,6 +36,7 @@ const CompanyPage: React.FC = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false)
+    setError('')
   }
 
   const handleCreateCompany = async () => {
@@ -45,16 +47,21 @@ const CompanyPage: React.FC = () => {
       creator: user?.id
     }
     await createCompany(data).then(async (res: any) => {
-      const data: any = {
-        user: user?.id,
-        company: res?.data?.id,
-        is_admin: true,
-        disabled: false
+      if (res?.error) {
+        setError('Помилка при створенні компанії')
+      } else {
+        const data: any = {
+          user: user?.id,
+          company: res?.data?.id,
+          is_admin: true,
+          disabled: false
+        }
+        setError('')
+        await getCompanies()
+        await createEmployee(data).then(() => {
+          handleCloseModal()
+        })
       }
-      await getCompanies()
-      await createEmployee(data).then(() => {
-        handleCloseModal()
-      })
     })
   }
 
@@ -104,7 +111,7 @@ const CompanyPage: React.FC = () => {
             gap={'15px'}
           >
             {!isLoadingCompany && companyData &&
-             companyData?.length > 0 && companyData.map((company) => (
+              companyData?.length > 0 && companyData.map((company) => (
               <Box
                 key={company?.id}
                 display={'flex'}
@@ -160,6 +167,13 @@ const CompanyPage: React.FC = () => {
             onChange={handleChangeWebCompany}
             type='text'
             placeholder='Вебсайт' />
+
+          {error && <Box sx={{
+            color: 'red',
+            fontSize: '14px'
+          }}>
+            {error}
+          </Box>}
         </Box>
       </CustomizedModal>}
     </>

@@ -1,22 +1,25 @@
 /* eslint-disable no-void */
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd'
 import TaskCard from './TaskCard'
-import { Box } from '@mui/material'
+import { Autocomplete, Box, Button, InputAdornment } from '@mui/material'
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   IKanbanColumns, ITask,
+  RateOptions,
   useAssignedTaskMutation, useEditAssignedMutation,
   useUpdateTaskMutation
 } from 'src/store/task'
 import CustomizedInput from '../CustomizedInput'
 import CustomizedModal from '../CustomizedModal'
-import { useSelector } from 'react-redux'
-import { selectCurrentUserState } from 'src/store/users'
+import { useGetMeQuery } from 'src/store/users'
 import { serverURL } from 'src/config'
 import axios from 'axios'
+import { TaskPriority } from '../AddTasksModal'
+import format from 'date-fns/format'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 
 const Container = styled.div`
   display: flex;
@@ -63,7 +66,7 @@ interface IColumn {
 }
 
 const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
-  const currentUser = useSelector(selectCurrentUserState)
+  const { data: currentUser } = useGetMeQuery()
   const [updateTask] = useUpdateTaskMutation()
   const [updateAssigned] = useEditAssignedMutation()
   const [assignedTask] = useAssignedTaskMutation()
@@ -74,6 +77,8 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
   const [salary, setSalary] = useState('fixed')
   const [sum, setSum] = useState('')
   const [quantity, setQuantity] = useState('')
+  const [assignMode, setAssignMode] = useState(false)
+  const [employee, setEmployee] = useState('')
 
   const getAssignedCanChange = async (taskId: number) => {
     const token = localStorage.getItem('token') ?? ''
@@ -90,14 +95,43 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
     })
   }
 
+  const getEmployee = async (employeeId: number) => {
+    const token = localStorage.getItem('token') ?? ''
+    await axios.get(`${serverURL}/api/employee/${employeeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res: any) => {
+      if (res?.data) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        const user = `${res.data?.user?.name}  ${res.data?.user?.surname} / ${res.data?.user?.email}`
+        setEmployee(user)
+      }
+    }).catch(() => {
+      console.log('error')
+    })
+  }
+
+  useEffect(() => {
+    if (taskAssign?.assigned?.length > 0) {
+      void getEmployee(taskAssign?.assigned[0]?.employee)
+    }
+  }, [taskAssign])
+
   const handleOpenModal = () => {
     setOpenModal(true)
+  }
+
+  const handleAssignMode = () => {
+    setAssignMode(true)
   }
 
   const handleCloseModal = () => {
     setOpenModal(false)
     setSum('')
     setQuantity('')
+    setAssignMode(false)
+    setEmployee('')
   }
 
   const handleChangeTask = (task: ITask) => {
@@ -125,10 +159,6 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
     }).then(() => {
       handleCloseModal()
     })
-  }
-
-  const handleChangeSalary = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSalary(e.target.value)
   }
 
   const handleChangeSum = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,24 +259,161 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
         action={!isAssigned ? handleAssignTask : handleUpdateAssignTask}
         open={openModal}
       >
-        <Box
+        {!assignMode && <Box
+          display={'flex'}
+          flexDirection={'column'}
+          alignItems={'center'}
+          justifyContent={'center'}
+          gap={'8px'}
+        >
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'start'}
+          >
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              Назва задачі
+            </Box>
+            <CustomizedInput
+              value={taskAssign?.name}
+              type='text'
+              disabled />
+          </Box>
+
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'start'}
+          >
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              Кількість годин
+            </Box>
+            <CustomizedInput
+              value={taskAssign?.hours_spent}
+              type='number'
+              disabled />
+          </Box>
+
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'start'}
+          >
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              Пріоритетність
+            </Box>
+            <CustomizedInput
+              value={TaskPriority[taskAssign?.priority ?? 1]}
+              type='text'
+              disabled />
+          </Box>
+
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'start'}
+          >
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              Дата початку
+            </Box>
+            <CustomizedInput
+              value={format(new Date(taskAssign?.planned_start_date ?? ''), 'dd-MM-yyyy')}
+              type='text'
+              disabled
+            />
+          </Box>
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'start'}
+          >
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              Дата закінчення
+            </Box>
+            <CustomizedInput
+              value={format(new Date(taskAssign?.planned_end_date ?? ''), 'dd-MM-yyyy')}
+              type='text'
+              disabled
+            />
+          </Box>
+
+          {!(taskAssign?.assigned?.length > 0) && <Button
+            onClick={handleAssignMode}
+            variant={'contained'}
+            color={'primary'}
+            sx={{
+              width: '380px',
+              marginTop: '20px'
+            }}
+          >
+            Назначити виконавця
+          </Button>}
+
+          {(taskAssign?.assigned?.length > 0) &&
+            <Box
+              color={'#000'}
+              fontSize={'14px'}
+              marginLeft={'7px'}
+            >
+              {employee}
+            </Box>}
+        </Box>}
+
+        {assignMode && <Box
           display={'flex'}
           flexDirection={'column'}
           alignItems={'center'}
           justifyContent={'center'}
           gap={'15px'}
         >
-          <CustomizedInput
-            value={salary}
-            onChange={handleChangeSalary}
-            type='text'
-            placeholder='Вид оплати' />
+
+          <Autocomplete options={RateOptions}
+            getOptionLabel={(option) => option.title}
+            onChange={(e, newValue) => {
+              setSalary(newValue?.value ?? 'fixed')
+            }}
+            sx={{
+              width: '381px',
+              height: '7px',
+              padding: '0 !important',
+              marginBottom: '37px'
+            }}
+            renderInput={(params) => <CustomizedInput {...params} />}
+            value={RateOptions.find((option) => option.value === salary)}
+          />
 
           <CustomizedInput
             value={sum}
             onChange={handleChangeSum}
             type='number'
-            placeholder='Cума' />
+            placeholder='Cума $'
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AttachMoneyIcon />
+                </InputAdornment>
+              )
+            }} />
 
           {isAssigned && <CustomizedInput
             value={quantity}
@@ -254,7 +421,7 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
             type='number'
             placeholder='Кількість годин' />}
 
-        </Box>
+        </Box>}
       </CustomizedModal>}
     </>
   )

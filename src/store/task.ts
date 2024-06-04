@@ -21,6 +21,11 @@ export enum ERateType {
   HOUR = 'hour'
 }
 
+export const RateOptions = [
+  { value: ERateType.FIXED, title: 'Фіксована' },
+  { value: ERateType.HOUR, title: 'Погодинна' }
+]
+
 interface RequestTask {
   state: string
   priority: number
@@ -58,6 +63,8 @@ export interface ITask {
   planned_end_date: string
   actual_start_date: string
   actual_end_date: string
+  hours_spent?: number
+  assigned?: any
 }
 
 interface PutTask {
@@ -163,6 +170,23 @@ export const TaskApi = createApi({
         }
       }),
       invalidatesTags: [{ type: 'Task', id: 'LIST' }]
+    }),
+    createProjectManager: builder.mutation({
+      query: (params: { project: number, employee: number, disabled: boolean }) => ({
+        url: '/pm',
+        method: 'POST',
+        body: {
+          project: params.project,
+          employee: params.employee,
+          disabled: params.disabled
+        }
+      })
+    }),
+    deleteProjectManager: builder.mutation({
+      query: (employeeId: number) => ({
+        url: `/pm/${employeeId}`,
+        method: 'DELETE'
+      })
     })
   })
 })
@@ -175,7 +199,9 @@ export const {
   useDeleteTaskMutation,
   useAssignedCanChangeQuery,
   useEditAssignedMutation,
-  useAssignedTaskMutation
+  useAssignedTaskMutation,
+  useCreateProjectManagerMutation,
+  useDeleteProjectManagerMutation
 } = TaskApi
 
 export interface IKanbanColumns {
@@ -188,6 +214,7 @@ export interface IKanbanColumns {
 interface TaskState {
   tasks: ITask[]
   kanbanColumns: IKanbanColumns
+  openModal: boolean
 }
 
 const initialState: TaskState = {
@@ -213,7 +240,8 @@ const initialState: TaskState = {
       title: 'Завершено',
       items: []
     }
-  }
+  },
+  openModal: false
 }
 
 const taskSlice = createSlice({
@@ -225,13 +253,17 @@ const taskSlice = createSlice({
     },
     setKanbanColumns: (state, action: PayloadAction<IKanbanColumns>) => {
       state.kanbanColumns = action.payload
+    },
+    setOpenModal: (state, action: PayloadAction<boolean>) => {
+      state.openModal = action.payload
     }
   }
 })
 
-export const { setTaskState, setKanbanColumns } = taskSlice.actions
+export const { setTaskState, setKanbanColumns, setOpenModal } = taskSlice.actions
 
 export const selectTaskState = (state: RootState) => state?.task.tasks
 export const selectKanbanColumns = (state: RootState) => state?.task.kanbanColumns
+export const selectOpenModal = (state: RootState) => state?.task.openModal
 
 export default taskSlice.reducer

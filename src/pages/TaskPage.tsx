@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo } from 'react'
-import { Box, Button, IconButton, InputAdornment, Typography, useTheme } from '@mui/material'
+import { Box, IconButton, InputAdornment, Typography } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
 import KanbanBoard from 'src/components/kanban/KanbanBoard'
 import CustomizedInput from 'src/components/CustomizedInput'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { useSelector, useDispatch } from 'react-redux'
 import { useLocation } from 'react-router-dom'
-import { selectProjectState, useGetProjectFinanceQuery, useProjectIsPmQuery } from 'src/store/project'
+import { selectProjectState, useGetProjectFinanceQuery } from 'src/store/project'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { IKanbanColumns, ITask, selectKanbanColumns, selectTaskState, setTaskState } from 'src/store/task'
+import { IKanbanColumns, ITask, selectKanbanColumns, selectOpenModal, selectTaskState, setOpenModal, setTaskState } from 'src/store/task'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { IChat, useCreateChatMutation } from 'src/store/chat'
-import { selectCurrentUserState } from 'src/store/users'
+import { useGetMeQuery } from 'src/store/users'
 import axios from 'axios'
 import { serverURL } from 'src/config'
 import AddTasksModal from 'src/components/AddTasksModal'
@@ -54,19 +54,17 @@ const ChatTextMessage = ({ message }: { message: IChat }) => {
 }
 
 const TaskPage: React.FC = () => {
-  const theme = useTheme()
   const dispatch = useDispatch()
   const [createMesaage] = useCreateChatMutation()
   const projectId = useLocation().pathname.split('/')[2]
-  const currentUser = useSelector(selectCurrentUserState)
+  const { data: user } = useGetMeQuery()
   const projectFinance = useGetProjectFinanceQuery(projectId)?.data
-  const { data: isProjectManager } = useProjectIsPmQuery(projectId)
   const currentProject = useSelector(selectProjectState).filter(project => project.id === Number(projectId))[0]
   const tasksState = useSelector(selectTaskState)
   const kanbanColumnsState = useSelector(selectKanbanColumns)
+  const openModal = useSelector(selectOpenModal)
 
   const [isLoading, setIsLoading] = React.useState(false)
-  const [openModal, setOpenModal] = React.useState(false)
   const [message, setMessage] = React.useState('')
   const [chatMessagesRemote, setChatMessagesRemote] = React.useState<IChat[]>([])
 
@@ -134,11 +132,7 @@ const TaskPage: React.FC = () => {
   }
 
   const handleCloseModal = () => {
-    setOpenModal(false)
-  }
-
-  const handleOpenModal = () => {
-    setOpenModal(true)
+    dispatch(setOpenModal(false))
   }
 
   const handleSetMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +140,7 @@ const TaskPage: React.FC = () => {
   }
 
   const handleCreateMessage = async () => {
-    await createMesaage({ project: Number(projectId), text: message, user: Number(currentUser?.id) })
+    await createMesaage({ project: Number(projectId), text: message, user: Number(user?.id) })
   }
 
   const handlePushMessage = () => {
@@ -172,34 +166,9 @@ const TaskPage: React.FC = () => {
           alignItems={'start'}
           gap={'30px'}
         >
-          <Box
-            width={'1045px'}
-            display={'flex'}
-            alignItems={'center'}
-            justifyContent={'space-between'}
-          >
-            <Typography fontSize={30} >
-              Страниця проекту
-            </Typography>
-            {isProjectManager && <Button
-              onClick={handleOpenModal}
-              sx={{
-                width: '100px',
-                height: '40px',
-                borderRadius: '12px',
-                backgroundColor: theme.palette.primary.main,
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.dark
-                }
-              }}>
-              <Typography variant='button'
-                sx={{
-                  textTransform: 'capitalize',
-                  color: theme.palette.text.primary
-                }}
-              >+ Додати</Typography>
-            </Button>}
-          </Box>
+          <Typography fontSize={30} >
+            Страниця проєкту
+          </Typography>
 
           {currentProject && <Box
             width={'1045px'}
@@ -300,10 +269,10 @@ const TaskPage: React.FC = () => {
               wordWrap: 'break-word'
             }}>
             <Typography fontSize={18} >
-              Дохід: {projectFinance?.income}
+              Дохід: {projectFinance?.income} $
             </Typography>
             <Typography fontSize={18} >
-              Профіт: {projectFinance?.profit}
+              Профіт: {projectFinance?.profit} $
             </Typography>
             <Typography fontSize={18} >
               Начало: {projectFinance?.start_date}

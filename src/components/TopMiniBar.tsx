@@ -1,20 +1,25 @@
 import React from 'react'
-import { Box, useTheme } from '@mui/material'
+import { Box, Button, Typography, useTheme } from '@mui/material'
 import { ReactComponent as Logo } from '../assets/logo-pulse-flow.svg'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Time from './Time'
 import LeftBarItem from './items/LeftBarItem'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentCompany } from 'src/store/company'
+import { useProjectIsPmQuery } from 'src/store/project'
+import { setOpenModal } from 'src/store/task'
 
 const items = ['ЗАВДАННЯ', 'МОЯ КОМАНДА']
 
 const TopMiniBar = () => {
   const theme = useTheme()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const location = useLocation()
   const projectId = location.pathname.split('/')[2]
+  const isTaskLocation = location.pathname.includes('task')
   const currentCompany = useSelector(selectCurrentCompany)
+  const { data: isProjectManager } = useProjectIsPmQuery(projectId)
 
   const routerList = [
     `/task/${projectId}`,
@@ -23,6 +28,10 @@ const TopMiniBar = () => {
 
   const handleNavigate = () => {
     navigate('/')
+  }
+
+  const handleOpenModal = () => {
+    dispatch(setOpenModal(true))
   }
 
   return (
@@ -64,15 +73,6 @@ const TopMiniBar = () => {
         >{currentCompany?.name}</Box>
         <Box
           sx={{
-            fontSize: '20px',
-            fontStyle: 'normal',
-            fontWeight: 'bold',
-            lineHeight: '30px',
-            color: theme.palette.primary.dark
-          }}
-        >{currentCompany?.unique_identifier}</Box>
-        <Box
-          sx={{
             display: 'flex',
             flexDirection: 'row',
             gap: '65px',
@@ -88,7 +88,31 @@ const TopMiniBar = () => {
           })}
         </Box>
       </Box>
-      <Time />
+      <Box
+        display={'flex'}
+        alignItems={'center'}
+      >
+        {isTaskLocation && isProjectManager && <Button
+          onClick={handleOpenModal}
+          sx={{
+            width: '100px',
+            height: '40px',
+            marginRight: '40px',
+            borderRadius: '12px',
+            backgroundColor: theme.palette.primary.main,
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark
+            }
+          }}>
+          <Typography variant='button'
+            sx={{
+              textTransform: 'capitalize',
+              color: theme.palette.text.primary
+            }}
+          >+ Додати</Typography>
+        </Button>}
+        <Time />
+      </Box>
     </Box>
   )
 }

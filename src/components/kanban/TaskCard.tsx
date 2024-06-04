@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ITask } from 'src/store/task'
 import { formatDate } from '../utils/formatDate'
+import { TaskPriority } from '../AddTasksModal'
 
 const TaskInformation = styled.div`
   display: flex;
@@ -53,7 +54,7 @@ const TaskCard = ({ item, index }: ITaskCard) => {
           <TaskInformation>
             <div className='secondary-details'>{item?.name}</div>
             <div className='secondary-details'>{item?.description}</div>
-            <div className='secondary-details'>priority: {item?.priority}</div>
+            <div className='secondary-details'>Пріоритет: {TaskPriority[item?.priority]}</div>
             <div className='secondary-details'>
               {formatDate(item?.planned_start_date).format2}
             </div>

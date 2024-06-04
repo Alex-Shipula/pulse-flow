@@ -30,6 +30,7 @@ export interface IEmployee {
   }
   is_admin: boolean
   disabled: boolean
+  project_manager?: boolean
 }
 
 interface UpdateEmployee {
