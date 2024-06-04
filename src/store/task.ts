@@ -76,6 +76,7 @@ interface PutTask {
   description?: string
   planned_start_date?: string
   planned_end_date?: string
+  hours_spent?: number
 }
 
 interface SearchTaskRequest {
@@ -184,8 +185,14 @@ export const TaskApi = createApi({
     }),
     deleteProjectManager: builder.mutation({
       query: (employeeId: number) => ({
-        url: `/pm/${employeeId}`,
+        url: `/pm/delete/${employeeId}`,
         method: 'DELETE'
+      })
+    }),
+    getEmployeeMe: builder.query({
+      query: (taskId: number) => ({
+        url: `/employee/me/${taskId}`,
+        method: 'GET'
       })
     })
   })
@@ -201,7 +208,8 @@ export const {
   useEditAssignedMutation,
   useAssignedTaskMutation,
   useCreateProjectManagerMutation,
-  useDeleteProjectManagerMutation
+  useDeleteProjectManagerMutation,
+  useGetEmployeeMeQuery
 } = TaskApi
 
 export interface IKanbanColumns {

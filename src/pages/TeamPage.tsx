@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography } from '@mui/material'
 import WrapperPage from 'src/components/WrapperPage'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { IEmployee, useSearchEmployeeQuery } from 'src/store/employee'
+import { IEmployee, useGetEmployeeByCompanyQuery } from 'src/store/employee'
 import { useSelector } from 'react-redux'
 import { selectCurrentCompany } from 'src/store/company'
 import { CompanyItem } from 'src/components/items/CompanyItem'
@@ -15,8 +15,8 @@ const TeamPage: React.FC = () => {
   const { data: user } = useGetMeQuery()
   const currentCompany = useSelector(selectCurrentCompany)
   const projectId = useLocation().pathname.split('/')[2]
-  const team = currentCompany && useSearchEmployeeQuery({ company: currentCompany?.id })?.data
-  const refetchTeam = useSearchEmployeeQuery({ company: currentCompany?.id }).refetch
+  const team = currentCompany && useGetEmployeeByCompanyQuery(currentCompany?.id)?.data
+  const refetchTeam = useGetEmployeeByCompanyQuery(currentCompany?.id ?? 0).refetch
   const [createPM] = useCreateProjectManagerMutation()
   const [deletePM] = useDeleteProjectManagerMutation()
 

@@ -43,7 +43,7 @@ export const CompanyItem = ({ title, subTitle, info, isAdmin, isPm, isDeveloper,
         <Typography fontSize={20}>{title}</Typography>
         <Typography fontSize={14}>{subTitle}</Typography>
         {!!isAdmin && <Typography fontSize={14}>{isAdmin && 'Адмін'}</Typography>}
-        {!!isPm && <Typography fontSize={14}>{isPm && 'Проджект менеджер'}</Typography>}
+        {!!isPm && <Typography fontSize={14}>{isPm && 'Проєкт менеджер'}</Typography>}
         {!!isDeveloper && <Typography fontSize={14}>{isDeveloper && 'Розробник'}</Typography>}
         <Typography fontSize={10}>{info}</Typography>
       </Box>

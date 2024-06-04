@@ -95,6 +95,12 @@ export const EmployeeApi = createApi({
         body: { email, company_id }
       }),
       invalidatesTags: [{ type: 'Employee', id: 'LIST' }]
+    }),
+    getEmployeeByCompany: builder.query<IEmployee[], number>({
+      query: (companyId) => ({
+        url: `/byCompany/${companyId}`,
+        method: 'GET'
+      })
     })
   })
 })
@@ -104,7 +110,8 @@ export const {
   useSearchEmployeeQuery,
   useGetEmployeeQuery,
   useUpdateEmployeeMutation,
-  useEmployeeInvateMutation
+  useEmployeeInvateMutation,
+  useGetEmployeeByCompanyQuery
 } = EmployeeApi
 
 interface EmployeeState {

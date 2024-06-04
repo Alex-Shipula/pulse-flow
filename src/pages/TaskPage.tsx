@@ -193,7 +193,7 @@ const TaskPage: React.FC = () => {
             justifyContent={'space-between'}
             alignItems={'start'}>
 
-            {!isLoading && <KanbanBoard kanbanColumns={kanban} />}
+            {!isLoading && <KanbanBoard kanbanColumns={kanban} handleGetTasksRemote={handleGetTasksRemote} />}
             <Box
               display={'flex'}
               flexDirection={'column'}
@@ -274,11 +274,26 @@ const TaskPage: React.FC = () => {
             <Typography fontSize={18} >
               Профіт: {projectFinance?.profit} $
             </Typography>
-            <Typography fontSize={18} >
-              Начало: {projectFinance?.start_date}
-            </Typography>
-            <Typography fontSize={18} >
-              Кінець: {projectFinance?.end_date}
+            <Typography fontSize={18}>
+              Виконані задачі: {Object.keys(projectFinance?.tasks).map((key) => (
+                <Box
+                  key={key}
+                  display={'flex'}
+                  flexDirection={'column'}
+                  justifyContent={'start'}
+                >
+                  {key}:
+                  {projectFinance?.tasks[key].map((task: any) => (
+                    <Box
+                      key={task?.task_id}
+                      display={'flex'}
+                      marginLeft={'20px'}
+                    >
+                      Назва задачі: {task?.name}  Зарплатня: {task?.salary}  Витрачені години: {task?.hours_spent}
+                    </Box>
+                  ))}
+                </Box>
+              ))}
             </Typography>
           </Box>}
         </Box>

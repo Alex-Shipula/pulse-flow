@@ -74,8 +74,8 @@ const SignInPage: React.FC = () => {
             setError('')
           }
         })
-        .catch((err) => {
-          setError(err?.response?.data?.message || 'Введено неправильні дані')
+        .catch(() => {
+          setError('Введено неправильні дані')
         })
     } else if (!signUp && email && password) {
       const authObject = {
@@ -93,8 +93,8 @@ const SignInPage: React.FC = () => {
             setPassword('')
           }
         })
-        .catch((err) => {
-          setError(err?.response?.data?.message || 'Невірні облікові дані')
+        .catch(() => {
+          setError('Невірні облікові дані')
         })
     }
   }
@@ -150,7 +150,7 @@ const SignInPage: React.FC = () => {
               <Typography variant='body1' sx={{
                 color: theme.palette.text.primary,
                 marginBottom: '4.5px'
-              }}>Name</Typography>
+              }}>Ім’я</Typography>
               <CustomizedInput
                 value={name}
                 type='text'
@@ -167,7 +167,7 @@ const SignInPage: React.FC = () => {
               <Typography variant='body1' sx={{
                 color: theme.palette.text.primary,
                 marginBottom: '4.5px'
-              }}>SurName</Typography>
+              }}>Прізвище</Typography>
               <CustomizedInput
                 value={surname}
                 type='text'
@@ -184,7 +184,7 @@ const SignInPage: React.FC = () => {
               <Typography variant='body1' sx={{
                 color: theme.palette.text.primary,
                 marginBottom: '4.5px'
-              }}>Email</Typography>
+              }}>Імейл</Typography>
               <CustomizedInput
                 value={email}
                 type='email'
@@ -200,7 +200,7 @@ const SignInPage: React.FC = () => {
               <Typography variant='body1' sx={{
                 color: theme.palette.text.primary,
                 marginBottom: '4.5px'
-              }}>Password</Typography>
+              }}>Пароль</Typography>
               <CustomizedInput
                 placeholder='Введить пароль'
                 value={password}

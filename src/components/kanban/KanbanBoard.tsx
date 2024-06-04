@@ -9,12 +9,12 @@ import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   IKanbanColumns, ITask,
   RateOptions,
-  useAssignedTaskMutation, useEditAssignedMutation,
+  useAssignedTaskMutation,
+  useGetEmployeeMeQuery,
   useUpdateTaskMutation
 } from 'src/store/task'
 import CustomizedInput from '../CustomizedInput'
 import CustomizedModal from '../CustomizedModal'
-import { useGetMeQuery } from 'src/store/users'
 import { serverURL } from 'src/config'
 import axios from 'axios'
 import { TaskPriority } from '../AddTasksModal'
@@ -65,14 +65,14 @@ interface IColumn {
   }>
 }
 
-const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
-  const { data: currentUser } = useGetMeQuery()
+const KanbanBoard = ({ kanbanColumns, handleGetTasksRemote }:
+{ kanbanColumns: IKanbanColumns, handleGetTasksRemote: () => void }) => {
   const [updateTask] = useUpdateTaskMutation()
-  const [updateAssigned] = useEditAssignedMutation()
   const [assignedTask] = useAssignedTaskMutation()
   const [columns, setColumns] = useState(kanbanColumns)
   const [openModal, setOpenModal] = useState(false)
   const [taskAssign, setTaskAssign] = useState(null as ITask | null)
+  const { data: employeeMe } = useGetEmployeeMeQuery(taskAssign ? taskAssign?.id : 0)
   const [isAssigned, setIsAssigned] = useState(false)
   const [salary, setSalary] = useState('fixed')
   const [sum, setSum] = useState('')
@@ -112,6 +112,20 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
     })
   }
 
+  const handleChangeHour = () => {
+    if (isAssigned && (taskAssign?.assigned?.length > 0)) {
+      void handleUpdateAssignTask().then(() => {
+        handleGetTasksRemote()
+      })
+    }
+  }
+
+  useEffect(() => {
+    if (taskAssign?.hours_spent) {
+      (taskAssign?.hours_spent >= 0) && setQuantity(taskAssign?.hours_spent.toString())
+    }
+  }, [taskAssign])
+
   useEffect(() => {
     if (taskAssign?.assigned?.length > 0) {
       void getEmployee(taskAssign?.assigned[0]?.employee)
@@ -139,15 +153,18 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
     void getAssignedCanChange(task?.id)
   }
 
-  const handleUpdateAssignTask = async () => {
-    await updateAssigned({
-      taskId: taskAssign ? taskAssign?.id : 0,
-      rate_type: salary,
-      rate: Number(sum),
-      hours_spent: Number(quantity)
-    }).then(() => {
-      handleCloseModal()
-    })
+  async function handleUpdateAssignTask () {
+    if (taskAssign?.id) {
+      await updateTask({
+        taskId: taskAssign?.id,
+        task: {
+          ...taskAssign,
+          hours_spent: Number(quantity)
+        }
+      }).then(() => {
+        handleCloseModal()
+      })
+    }
   }
 
   const handleAssignTask = async () => {
@@ -155,8 +172,9 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
       task: taskAssign ? taskAssign?.id : 0,
       rate_type: salary,
       rate: Number(sum),
-      employee: Number(currentUser?.id)
+      employee: employeeMe?.id
     }).then(() => {
+      handleGetTasksRemote()
       handleCloseModal()
     })
   }
@@ -254,9 +272,9 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
         </DragDropContext>
       </Box>
       {openModal && <CustomizedModal
-        title={'Назначення задачі'}
+        title={(isAssigned && !(taskAssign?.assigned?.length > 0)) ? 'Доєднатись до завдання' : 'Редагувати години'}
         handleClose={handleCloseModal}
-        action={!isAssigned ? handleAssignTask : handleUpdateAssignTask}
+        action={(isAssigned && !(taskAssign?.assigned?.length > 0)) ? handleAssignTask : () => { return null }}
         open={openModal}
       >
         {!assignMode && <Box
@@ -284,7 +302,7 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
               disabled />
           </Box>
 
-          <Box
+          {isAssigned && <Box
             display={'flex'}
             flexDirection={'column'}
             alignItems={'start'}
@@ -297,10 +315,11 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
               Кількість годин
             </Box>
             <CustomizedInput
-              value={taskAssign?.hours_spent}
+              value={quantity}
+              onChange={handleChangeQuantity}
               type='number'
-              disabled />
-          </Box>
+              placeholder='Кількість годин' />
+          </Box>}
 
           <Box
             display={'flex'}
@@ -357,26 +376,40 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
             />
           </Box>
 
-          {!(taskAssign?.assigned?.length > 0) && <Button
-            onClick={handleAssignMode}
-            variant={'contained'}
-            color={'primary'}
-            sx={{
-              width: '380px',
-              marginTop: '20px'
-            }}
+          <Box
+            display={'flex'}
+            flexDirection={'column'}
+            alignItems={'center'}
+            gap={'15px'}
           >
-            Назначити виконавця
-          </Button>}
-
-          {(taskAssign?.assigned?.length > 0) &&
             <Box
               color={'#000'}
               fontSize={'14px'}
               marginLeft={'7px'}
             >
-              {employee}
-            </Box>}
+              Виконавець: {employee ? `${employee}` : undefined}
+            </Box>
+            {!(taskAssign?.assigned?.length > 0) && <Button
+              onClick={handleAssignMode}
+              variant={'contained'}
+              color={'primary'}
+              sx={{
+                width: '380px'
+              }}
+            >
+            Додатись як виконавець
+            </Button>}
+            {(taskAssign?.assigned?.length > 0) && isAssigned && <Button
+              onClick={handleChangeHour}
+              variant={'contained'}
+              color={'primary'}
+              sx={{
+                width: '380px'
+              }}
+            >
+                Оновити години
+            </Button>}
+          </Box>
         </Box>}
 
         {assignMode && <Box
@@ -414,12 +447,6 @@ const KanbanBoard = ({ kanbanColumns }: { kanbanColumns: IKanbanColumns }) => {
                 </InputAdornment>
               )
             }} />
-
-          {isAssigned && <CustomizedInput
-            value={quantity}
-            onChange={handleChangeQuantity}
-            type='number'
-            placeholder='Кількість годин' />}
 
         </Box>}
       </CustomizedModal>}
